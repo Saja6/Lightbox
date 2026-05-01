@@ -55,7 +55,7 @@ def compareHashes(oldMap, newMap):
     return changes
 
 if __name__ == '__main__':
-    interval = 60 # every 60 seconds we will run a file integrity check
+    interval = 300 # every 5 minutes we will run a file integrity check
     baselineMap = computeHashes()
     with open("results.rpt", "a") as f:
         while True:
