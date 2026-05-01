@@ -35,7 +35,7 @@ def scanPorts(mode = "basic_mode"):
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "basic_mode"
-    interval = 10 # 5 minutes per scan
+    interval = 300 # 5 minutes between each scan
     with open('results.rpt', 'a') as f:
         while True:
             f.write(f"\n[INFO] Starting scan in {mode}\n")
