@@ -1,4 +1,5 @@
 import datetime
+import time
 from collections import defaultdict
 import re
 ip_pattern = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}-\d{2}:\d{2})\s+\S+\s+sshd-session\[(\d+)\]: Failed password for (\S+) from ((?:\d{1,3}\.){3}\d{1,3}) port (\d+) ssh\d+'
@@ -31,21 +32,25 @@ def loghunt():
                 suspiciousIPs.append((IP, portNum, affectedUser, time, date))
     return suspiciousIPs
 if __name__ == '__main__':
+    interval = 300 # 5 minutes between each parse
     attempts = defaultdict(int) # create an empty dictionary
     events = loghunt()
     for entry in events:
         ip = entry[0] # IP is always the first element in our tuple
         attempts[ip] += 1 # increment the attempts for that IP
-    with open("IPTrack.rpt", 'w') as f:
-        for ip, count in attempts.items():
-            f.write(f"****** BEGIN SUMMARY: {ip} ******\n\n")
-            f.write(f"{ip} has {count} failed attempts\n\n")
-            for entry in events:
-                if entry[0] == ip: # the attempts made by an IP to SSH will be written to the file.
-                    f.write(f"{entry[0]} on port {entry[1]} "f"attempted login on {entry[2]} at {entry[3]} on {entry[4]}\n")
-            # depending on how many login attempts there have been, different kinds of info will be written to the report.
-            if attempts[ip] < 3: f.write(f"Severity: LOW -- {attempts[ip]} failed attempts. No further action needed.\n\n")
-            elif attempts[ip] <= 5 and attempts[ip] >= 3: f.write(f"Severity: MODERATE -- {attempts[ip]} failed attempts. Consider monitoring this IP.\n\n")
-            elif attempts[ip] >= 5 and attempts[ip] <= 7: f.write(f"Severity: HIGH -- {attempts[ip]} failed attempts. Consider blocking this IP.\n\n")
-            elif attempts[ip] > 7: f.write(f"Severity: VERY HIGH -- {attempts[ip]} failed attempts. TAKE IMMEDIATE ACTION!\n\n")
-            f.write(f"****** END SUMMARY: {ip} ******\n")
+    filename = f"results_{datetime.datetime.now().strftime('%m-%d-%Y_%I:%M:%S-%p')}.rpt"
+    with open(filename, 'w') as f:
+        while True:
+            for ip, count in attempts.items():
+                f.write(f"****** BEGIN SUMMARY: {ip} ******\n\n")
+                f.write(f"{ip} has {count} failed attempts\n\n")
+                for entry in events:
+                    if entry[0] == ip: # the attempts made by an IP to SSH will be written to the file.
+                        f.write(f"{entry[0]} on port {entry[1]} "f"attempted login on {entry[2]} at {entry[3]} on {entry[4]}\n")
+                # depending on how many login attempts there have been, different kinds of info will be written to the report.
+                if attempts[ip] < 3: f.write(f"Severity: LOW -- {attempts[ip]} failed attempts. No further action needed.\n\n")
+                elif attempts[ip] <= 5 and attempts[ip] >= 3: f.write(f"Severity: MODERATE -- {attempts[ip]} failed attempts. Consider monitoring this IP.\n\n")
+                elif attempts[ip] >= 5 and attempts[ip] <= 7: f.write(f"Severity: HIGH -- {attempts[ip]} failed attempts. Consider blocking this IP.\n\n")
+                elif attempts[ip] > 7: f.write(f"Severity: VERY HIGH -- {attempts[ip]} failed attempts. TAKE IMMEDIATE ACTION!\n\n")
+                f.write(f"****** END SUMMARY: {ip} ******\n")
+            time.sleep(interval)
