@@ -1,3 +1,4 @@
+# Copyright 2026 Saja6: https://github.com/Saja6
 import socket
 import datetime
 # we will listen on any port and receive connections and log specific details about it
