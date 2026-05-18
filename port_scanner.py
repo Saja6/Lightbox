@@ -1,3 +1,4 @@
+# Copyright 2026 Saja6: https://github.com/Saja6
 import socket
 # we will scan ports over the designated range
 # @param: the range of ports such as (1, 1024) to scan
