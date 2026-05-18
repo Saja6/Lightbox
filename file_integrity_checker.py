@@ -1,3 +1,4 @@
+# Copyright 2026 Saja6: https://github.com/Saja6
 import hashlib
 import os
 import time
