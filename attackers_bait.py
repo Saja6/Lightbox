@@ -13,14 +13,15 @@ def startService(portNumber):
             conn, addr = s.accept()
             with conn:
                 print("Connection made by:", addr)
-                conn.sendall(b"Big Toe\n") # change this to send a different service name (highly suggested!)
+                conn.sendall(b"SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5\r\n") # send the service name over
                 with open("results.rpt", "a") as f:
                     f.write(f"**** BEGIN SUMMARY: {addr} ****\n")
                     while True:
                         data = conn.recv(1024)
                         if not data: break
-                        f.write(f"Data received: {data!r} at {datetime.now().strftime("%B %d %Y at %I:%M %p")}\n")
+                        timestamp = datetime.datetime.now().strftime("%B %d %Y at %I:%M %p")
+                        f.write(f"Data received: {data!r} at {timestamp}\n")
                     f.write(f"**** END SUMMARY: {addr} ****\n\n")
 
 if __name__ == '__main__':
-    startService(8888) # change this to be whatever port you want to listen on!
+    startService(2222) # change this to be whatever port you want to listen on!
