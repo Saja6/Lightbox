@@ -15,6 +15,7 @@ allowPattern = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+-\d{2}:\d{2}) pi kern
 #   information such as IP, date/time, destination, etc.
 #   to its respective key.
 def loghunt():
+    print("::: Now parsing firewall log...")
     output = []
     with open('ufw.log', 'r') as f:
         lines = f.readlines()
@@ -64,6 +65,7 @@ def loghunt():
                     "Destination Port": destinationPort
                 }
                 output.append(event)  # now add it to the array
+    print("::: Parsing complete.")
     return output
 if __name__ == '__main__':
     interval = 300 # we will wait 5 minutes until parsing the firewall log again.
