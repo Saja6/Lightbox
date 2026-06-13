@@ -29,6 +29,7 @@ def computeHashes():
                     hashMap[filePath] = fileHash # next, make a new entry in the hashMap
                 except (FileNotFoundError, PermissionError):
                     continue
+    print("::: Hash computation complete.")
     return hashMap
 
 # we will write our baseline hashMap results to a file called hashes.log.
