@@ -15,6 +15,7 @@ ip_pattern = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}-\d{2}:\d{2})\s+\S+\s
 #       loghunt() will return an empty list.
 #
 def loghunt():
+    print("::: Now parsing authentication log...")
     suspiciousIPs = []
     try: f = open('auth.log', 'r')
     except FileNotFoundError: f = open('/var/log/auth.log', 'r')
@@ -31,6 +32,7 @@ def loghunt():
                 time = dateAndTime.strftime("%I:%M:%S %p")
                 date = dateAndTime.strftime("%B %d, %Y")
                 suspiciousIPs.append((IP, portNum, affectedUser, time, date))
+    print("::: Parsing complete.")
     return suspiciousIPs
 if __name__ == '__main__':
     interval = 300 # 5 minutes between each parse
