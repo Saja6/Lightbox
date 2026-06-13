@@ -9,6 +9,7 @@ import time
 #           if the ping throws an exception, it will include the error
 #           in the dictionary as well.
 def ping(host):
+    print(f"::: Pinging {host}...")
     start = time.perf_counter()
     try:
         # NOTE: on Windows, replace "-c" with "-n"
@@ -28,6 +29,7 @@ def ping(host):
             "error": str(e),
             "time": round(elapsed, 2)
         }
+    print("::: Ping complete.")
 
 if __name__ == "__main__":
     hostList = ["wholefoods.com", "amazon.com", "google.com", "192.168.1.166", "172.16.17.32", "192.168.1.156", "192.168.1.1", "192.168.1.100"] # change these to your list of hosts!
