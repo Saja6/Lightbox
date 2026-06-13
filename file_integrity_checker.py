@@ -11,6 +11,7 @@ targets = [] # the directories we will compute file hashes inside are here (add 
 #       directory located in targets. if targets is empty,
 #       computeHashes() will return an empty hashMap.
 def computeHashes():
+    print("::: Computing hashes...")
     hashMap = {}  # here, a file path will be mapped to its corresponding computed hash
     if targets == []: return {}
     for thisTarget in targets: # for each directory, we will walk recursively through it
@@ -34,6 +35,7 @@ def computeHashes():
 #   @param: hashMap
 #   @return: none.
 def writeMap(map):
+    print("::: Writing hashes to hashes.log...")
     with open('hashes.log', 'w') as f:
         for fileName, hash in map.items():
             f.write(fileName + ' | ' + hash + '\n')
@@ -44,6 +46,7 @@ def writeMap(map):
 #   @return: a tuple containing the type of action, the path to file, and the old hash and path stored on
 #       file in the new map (if needed).
 def compareHashes(oldMap, newMap):
+    print("::: Comparing hashes to stored hashes...")
     changes = []
     for path, oldHash in oldMap.items(): # go through the hash and file path in the old map
         if path not in newMap: # we can't find the path; it was deleted
