@@ -5,6 +5,7 @@ import datetime
 # @param: the port number on which to listen for connections
 # @return: nothing
 def startService(portNumber):
+    print(f"::: Now activating honeypot on {portNumber}.")
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('', portNumber))
         s.listen()
