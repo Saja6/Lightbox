@@ -6,8 +6,7 @@ import time
 from collections import defaultdict
 
 # the following regex will assist in finding entries in the log file which indicate allowed and blocked traffic:
-ufwPattern = r'\[(UFW BLOCK|UFW AUDIT)\].*IN=(\S+)\s+OUT=(\S*)\s+MAC=([0-9a-fA-F:]+).*SRC=([\d\.]+).*DST=([\d\.]+|[0-9a-fA-F:]+)'allowPattern = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+-\d{2}:\d{2}) pi kernel: \[UFW ALLOW\] IN=\S* OUT=\S* SRC=(\d{1,3}(?:\.\d{1,3}){3}) DST=(\d{1,3}(?:\.\d{1,3}){3})(?:.*PROTO=(\w+))?(?:.*SPT=(\d+))?(?:.*DPT=(\d+))?'
-
+ufwPattern = r'\[(UFW BLOCK|UFW AUDIT)\].*IN=(\S+)\s+OUT=(\S*)\s+MAC=([0-9a-fA-F:]+).*SRC=([\d\.]+).*DST=([\d\.]+|[0-9a-fA-F:]+)'
 # we will parse a firewall log that contains information about traffic going through it.
 # @param: none
 # @return: an array of dictionaries, each of which map parsed
