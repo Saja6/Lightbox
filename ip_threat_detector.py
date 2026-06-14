@@ -37,23 +37,23 @@ def loghunt():
 if __name__ == '__main__':
     interval = 300 # 5 minutes between each parse
     attempts = defaultdict(int) # create an empty dictionary
-    events = loghunt()
-    for entry in events:
-        ip = entry[0] # IP is always the first element in our tuple
-        attempts[ip] += 1 # increment the attempts for that IP
-    filename = f"results_{datetime.datetime.now().strftime('%m-%d-%Y_%I:%M:%S-%p')}.rpt"
-    with open(filename, 'w') as f:
-        while True:
+    while True:
+        attempts.clear()
+        events = loghunt()
+        with open("IP-THREAT-DETECTOR_results.rpt", 'w') as f:
+            for entry in events:
+                ip = entry[0] # IP is always the first element in our tuple
+                attempts[ip] += 1 # increment the attempts for that IP
             for ip, count in attempts.items():
                 f.write(f"****** BEGIN SUMMARY: {ip} ******\n\n")
                 f.write(f"{ip} has {count} failed attempts\n\n")
                 for entry in events:
                     if entry[0] == ip: # the attempts made by an IP to SSH will be written to the file.
                         f.write(f"{entry[0]} on port {entry[1]} "f"attempted login on {entry[2]} at {entry[3]} on {entry[4]}\n")
-                # depending on how many login attempts there have been, different kinds of info will be written to the report.
-                if attempts[ip] < 3: f.write(f"Severity: LOW -- {attempts[ip]} failed attempts. No further action needed.\n\n")
-                elif attempts[ip] <= 5 and attempts[ip] >= 3: f.write(f"Severity: MODERATE -- {attempts[ip]} failed attempts. Consider monitoring this IP.\n\n")
-                elif attempts[ip] >= 5 and attempts[ip] <= 7: f.write(f"Severity: HIGH -- {attempts[ip]} failed attempts. Consider blocking this IP.\n\n")
-                elif attempts[ip] > 7: f.write(f"Severity: VERY HIGH -- {attempts[ip]} failed attempts. TAKE IMMEDIATE ACTION!\n\n")
+                    # depending on how many login attempts there have been, different kinds of info will be written to the report.
+                if count < 3: f.write(f"Severity: LOW -- {count} failed attempts. No further action needed.\n\n")
+                elif count <= 5: f.write(f"Severity: MODERATE -- {count} failed attempts. Consider monitoring this IP.\n\n")
+                elif count <= 7: f.write(f"Severity: HIGH -- {count} failed attempts. Consider blocking this IP.\n\n")
+                else: f.write(f"Severity: VERY HIGH -- {count} failed attempts. TAKE IMMEDIATE ACTION!\n\n")
                 f.write(f"****** END SUMMARY: {ip} ******\n")
-            time.sleep(interval)
+        time.sleep(interval)
