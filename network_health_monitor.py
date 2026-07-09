@@ -108,36 +108,39 @@ if __name__ == "__main__":
     TestWebsite = "www.google.com" # you may use a different website if you want.
 
     # now time to fetch results below:
-    routerResult = pingRouter(RouterIP)
-    DNSServerResult = pingDNSServer(DNSServerIP)
-    DNSLookupResult = None
-    if DNSServerResult == True: DNSLookupResult = testDNSlookup(DNSServerIP, TestWebsite)
-    else: print("\n::: DNS server unreachable. Skipping DNS lookup test.\n")
-    HTTPSresult = testHTTPSrequest(f"https://{TestWebsite}")
-    uploadSpeed, downloadSpeed = testDownloadAndUploadSpeeds()
-    pingLatency, HTTPSLatency, TCPLatency = testLatency(DNSServerIP, TestWebsite)
-    currentTime = datetime.datetime.now().strftime("%b-%d-%Y")
-    filename = "NetworkHealthMonitor_" + currentTime + ".rpt"
-    # we will generate a report with useful information below:
-    print(f"::: Generating network health report...\n")
-    with open(filename, "w") as f:
-        f.write("**** BEGIN NETWORK HEALTH SUMMARY ****\n")
-        f.write(f"Today's date: {datetime.datetime.now().strftime('%b %d, %Y at %I:%M %p')}\n\n")
-        f.write("* AVAILABILITY TESTS:\n")
-        routerText = "Router ping test: SUCCESSFUL" if routerResult == True else "Router ping test: FAILED"
-        DNSServerText1 = "DNS server ping test: SUCCESSFUL" if DNSServerResult == True else "DNS server ping test: FAILED"
-        DNSServerText2 = f"DNS lookup speed: {DNSLookupResult:.2f} ms" if DNSLookupResult else "DNS lookup speed: FAILED"
-        HTTPStext = "HTTPS request test: SUCCESSFUL" if HTTPSresult == True else "HTTP request test: FAILED"
-        f.write(routerText + "\n")
-        f.write(DNSServerText1 + "\n")
-        f.write(DNSServerText2 + "\n")
-        f.write(HTTPStext + "\n\n")
-        f.write("* TRANSMISSION SPEED TESTS:\n")
-        f.write(f"Network upload speed: {uploadSpeed:.2f} Mb/s\n")
-        f.write(f"Network download speed: {downloadSpeed:.2f} Mb/s\n\n")
-        f.write("* LATENCY TESTS:\n")
-        f.write(f"Ping latency: {pingLatency:.2f} ms\n")
-        f.write(f"HTTP latency: {HTTPSLatency:.2f} ms\n")
-        f.write(f"TCP latency: {TCPLatency:.2f} ms\n")
-        f.write("**** END NETWORK HEALTH SUMMARY ****\n")
-    print(f"::: Network health tests completed. Results are stored in: {os.path.abspath(filename)}")
+    while True:
+        routerResult = pingRouter(RouterIP)
+        DNSServerResult = pingDNSServer(DNSServerIP)
+        DNSLookupResult = None
+        if DNSServerResult == True: DNSLookupResult = testDNSlookup(DNSServerIP, TestWebsite)
+        else: print("\n::: DNS server unreachable. Skipping DNS lookup test.\n")
+        HTTPSresult = testHTTPSrequest(f"https://{TestWebsite}")
+        uploadSpeed, downloadSpeed = testDownloadAndUploadSpeeds()
+        pingLatency, HTTPSLatency, TCPLatency = testLatency(DNSServerIP, TestWebsite)
+        currentTime = datetime.datetime.now().strftime("%b-%d-%Y")
+        filename = "NetworkHealthMonitor_" + currentTime + ".rpt"
+        # we will generate a report with useful information below:
+        print(f"::: Generating network health report...\n")
+        with open(filename, "w") as f:
+            f.write("**** BEGIN NETWORK HEALTH SUMMARY ****\n")
+            f.write(f"Today's date: {datetime.datetime.now().strftime('%b %d, %Y at %I:%M %p')}\n\n")
+            f.write("* AVAILABILITY TESTS:\n")
+            routerText = "Router ping test: SUCCESSFUL" if routerResult == True else "Router ping test: FAILED"
+            DNSServerText1 = "DNS server ping test: SUCCESSFUL" if DNSServerResult == True else "DNS server ping test: FAILED"
+            DNSServerText2 = f"DNS lookup speed: {DNSLookupResult:.2f} ms" if DNSLookupResult else "DNS lookup speed: FAILED"
+            HTTPStext = "HTTPS request test: SUCCESSFUL" if HTTPSresult == True else "HTTP request test: FAILED"
+            f.write(routerText + "\n")
+            f.write(DNSServerText1 + "\n")
+            f.write(DNSServerText2 + "\n")
+            f.write(HTTPStext + "\n\n")
+            f.write("* TRANSMISSION SPEED TESTS:\n")
+            f.write(f"Network upload speed: {uploadSpeed:.2f} Mb/s\n")
+            f.write(f"Network download speed: {downloadSpeed:.2f} Mb/s\n\n")
+            f.write("* LATENCY TESTS:\n")
+            f.write(f"Ping latency: {pingLatency:.2f} ms\n")
+            f.write(f"HTTP latency: {HTTPSLatency:.2f} ms\n")
+            f.write(f"TCP latency: {TCPLatency:.2f} ms\n")
+            f.write("**** END NETWORK HEALTH SUMMARY ****\n")
+        print(f"::: Network health tests completed. Results are stored in: {os.path.abspath(filename)}\n")
+        print("::: Please wait 30 minutes for the next network health test.\n")
+        time.sleep(1800) # we will perform these tests every half hour.
