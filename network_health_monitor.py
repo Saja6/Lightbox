@@ -144,6 +144,7 @@ if __name__ == "__main__":
             f.write("**** END NETWORK HEALTH SUMMARY ****\n")
         print(f"::: Network health tests completed. Results are stored in: {os.path.abspath(filename)}\n")
         print("::: Please wait 30 minutes for the next network health test.\n")
+        # if you do not need emailing functions and features, comment out lines 110, 111, as well as lines 148 to 155.
         message = EmailMessage() # make an email message object and populate its fields:
         message["Subject"] = "Network Health Results"
         message["From"] = MyEmail
