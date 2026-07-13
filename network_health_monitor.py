@@ -7,7 +7,8 @@ import speedtest
 from dns import resolver
 import requests
 from ping3 import ping
-
+import smtplib
+from email.message import EmailMessage
 # We will try to ping our router by passing its IP address as an argument.
 # @param: the IP address of the router.
 # @return: True if the ping succeeded, False otherwise.
@@ -106,7 +107,8 @@ if __name__ == "__main__":
     DNSServerIP = "192.168.1.9" # change this to the IP address of your DNS server
     RouterIP = "192.168.1.1" # change this to the IP address of your router.
     TestWebsite = "www.google.com" # you may use a different website if you want.
-
+    MyEmail = "EMAIL" # change this to your email!
+    MyAppPass = "AAAA BBBB CCCC DDDD" # change this to your google app password!
     # now time to fetch results below:
     while True:
         routerResult = pingRouter(RouterIP)
@@ -117,8 +119,7 @@ if __name__ == "__main__":
         HTTPSresult = testHTTPSrequest(f"https://{TestWebsite}")
         uploadSpeed, downloadSpeed = testDownloadAndUploadSpeeds()
         pingLatency, HTTPSLatency, TCPLatency = testLatency(DNSServerIP, TestWebsite)
-        currentTime = datetime.datetime.now().strftime("%b-%d-%Y")
-        filename = "NetworkHealthMonitor_" + currentTime + ".rpt"
+        filename = "NetworkHealthMonitor.rpt"
         # we will generate a report with useful information below:
         print(f"::: Generating network health report...\n")
         with open(filename, "w") as f:
@@ -143,4 +144,12 @@ if __name__ == "__main__":
             f.write("**** END NETWORK HEALTH SUMMARY ****\n")
         print(f"::: Network health tests completed. Results are stored in: {os.path.abspath(filename)}\n")
         print("::: Please wait 30 minutes for the next network health test.\n")
+        message = EmailMessage() # make an email message object and populate its fields:
+        message["Subject"] = "Network Health Results"
+        message["From"] = MyEmail
+        message["To"] = MyEmail
+        with open(filename) as f: message.set_content(f.read()) # set the email content
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s: # smtp.gmail.com is the Gmail server, and SMTP operates on port 465.
+            s.login(MyEmail, MyAppPass)
+            s.send_message(message)
         time.sleep(1800) # we will perform these tests every half hour.
