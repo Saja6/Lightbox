@@ -4,7 +4,8 @@ import json
 import re
 import time
 from collections import defaultdict
-
+import smtplib
+from email.message import EmailMessage
 # the following regexes will assist in finding entries in the log file which indicate allowed and blocked traffic:
 blockPattern = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+-\d{2}:\d{2}) pi kernel: \[UFW BLOCK\] IN=(\S+) OUT= MAC=([0-9a-fA-F:]+) SRC=(\d{1,3}(?:\.\d{1,3}){3})(?:.*PROTO=(\w+))?(?:.*SPT=(\d+))?(?:.*DPT=(\d+))?'
 allowPattern = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+-\d{2}:\d{2}) pi kernel: \[UFW ALLOW\] IN=\S* OUT=\S* SRC=(\d{1,3}(?:\.\d{1,3}){3}) DST=(\d{1,3}(?:\.\d{1,3}){3})(?:.*PROTO=(\w+))?(?:.*SPT=(\d+))?(?:.*DPT=(\d+))?'
@@ -16,7 +17,7 @@ allowPattern = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+-\d{2}:\d{2}) pi kern
 #   to its respective key.
 def loghunt():
     output = []
-    with open('ufw.log', 'r') as f:
+    with open('/var/log/ufw.log', 'r') as f:
         lines = f.readlines()
         for l in lines: # iterate over all the lines
             blockMatch = re.match(blockPattern, l) # try to find a match where an IP address was blocked
@@ -66,7 +67,10 @@ def loghunt():
                 output.append(event)  # now add it to the array
     return output
 if __name__ == '__main__':
-    interval = 300 # we will wait 5 minutes until parsing the firewall log again.
+    # VARIABLES
+    interval = 1800 # we will wait 30 minutes until parsing the firewall log again.
+    MyEmail = "EMAIL # change this to your gmail address!
+    MyAppPass = "AAAA BBBB CCCC DDDD" # change this to your google app password!
     while True:
         eventList = loghunt()
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") # we will create individual snapshots
@@ -85,4 +89,13 @@ if __name__ == '__main__':
                 # below, count the number of times BLOCK or ALLOW appears in each tuple in the map
                 f.write(f"SOURCE {ip} | COUNT {count} | [BLOCK]: {eventtypes[ip].count('BLOCK')} | [ALLOW]: {eventtypes[ip].count('ALLOW')}")
                 f.write(f"\n**** END SUMMARY FOR {ip} ****\n\n")
+        message = EmailMessage() # make a new email object and set its contents (below)
+        message["Subject"] = "Firewall Log Parser Results"
+        message["From"] = MyEmail
+        message["To"] = MyEmail
+        with open("results.rpt") as f: message.set_content(f.read())
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s: # google's SMTP client operates on port #465.
+            s.login(MyEmail, MyAppPass)
+            s.send_message(message)
+        print(f"::: Firewall log parse complete. Report copy emailed to: {MyEmail}")
         time.sleep(interval)
