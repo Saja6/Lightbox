@@ -104,8 +104,8 @@ def testLatency(DNS_IP, website):
 
 if __name__ == "__main__":
     # GLOBAL VARIABLES:
-    DNSServerIP = "192.168.1.9" # change this to the IP address of your DNS server
-    RouterIP = "192.168.1.1" # change this to the IP address of your router.
+    DNSServerIP = "DNS_SERVER_IP" # change this to the IP address of your DNS server
+    RouterIP = "ROUTER_IP" # change this to the IP address of your router.
     TestWebsite = "www.google.com" # you may use a different website if you want.
     MyEmail = "EMAIL" # change this to your email!
     MyAppPass = "AAAA BBBB CCCC DDDD" # change this to your google app password!
