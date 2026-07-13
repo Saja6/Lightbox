@@ -89,6 +89,7 @@ if __name__ == '__main__':
                 # below, count the number of times BLOCK or ALLOW appears in each tuple in the map
                 f.write(f"SOURCE {ip} | COUNT {count} | [BLOCK]: {eventtypes[ip].count('BLOCK')} | [ALLOW]: {eventtypes[ip].count('ALLOW')}")
                 f.write(f"\n**** END SUMMARY FOR {ip} ****\n\n")
+        # if you do not need emailing functions and features, comment out lines 72, 73, as well as lines 93 to 100.
         message = EmailMessage() # make a new email object and set its contents (below)
         message["Subject"] = "Firewall Log Parser Results"
         message["From"] = MyEmail
@@ -97,5 +98,5 @@ if __name__ == '__main__':
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s: # google's SMTP client operates on port #465.
             s.login(MyEmail, MyAppPass)
             s.send_message(message)
-        print(f"::: Firewall log parse complete. Report copy emailed to: {MyEmail}")
+        print(f"::: Firewall log parse complete.")
         time.sleep(interval)
