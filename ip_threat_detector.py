@@ -15,7 +15,7 @@ ip_pattern = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}-\d{2}:\d{2})\s+\S+\s
 #       loghunt() will return an empty list.
 #
 def loghunt():
-    print("::: Now parsing authentication log...")
+    print("🕒 ::: Now parsing authentication log...")
     suspiciousIPs = []
     try: f = open('auth.log', 'r')
     except FileNotFoundError: f = open('/var/log/auth.log', 'r')
@@ -32,10 +32,9 @@ def loghunt():
                 time = dateAndTime.strftime("%I:%M:%S %p")
                 date = dateAndTime.strftime("%B %d, %Y")
                 suspiciousIPs.append((IP, portNum, affectedUser, time, date))
-    print("::: Parsing complete.")
     return suspiciousIPs
 if __name__ == '__main__':
-    interval = 300 # 5 minutes between each parse
+    interval = 1800 # 30 minutes between each parse
     attempts = defaultdict(int) # create an empty dictionary
     while True:
         attempts.clear()
@@ -51,9 +50,29 @@ if __name__ == '__main__':
                     if entry[0] == ip: # the attempts made by an IP to SSH will be written to the file.
                         f.write(f"{entry[0]} on port {entry[1]} "f"attempted login on {entry[2]} at {entry[3]} on {entry[4]}\n")
                     # depending on how many login attempts there have been, different kinds of info will be written to the report.
-                if count < 3: f.write(f"Severity: LOW -- {count} failed attempts. No further action needed.\n\n")
-                elif count <= 5: f.write(f"Severity: MODERATE -- {count} failed attempts. Consider monitoring this IP.\n\n")
-                elif count <= 7: f.write(f"Severity: HIGH -- {count} failed attempts. Consider blocking this IP.\n\n")
-                else: f.write(f"Severity: VERY HIGH -- {count} failed attempts. TAKE IMMEDIATE ACTION!\n\n")
+                if count < 3: f.write(f"Severity: 🟢🟢⚫⚫⚫ LOW -- {count} failed attempts. No further action needed.\n\n")
+                elif count <= 5: f.write(f"Severity: 🟡🟡🟡⚫⚫ MODERATE -- {count} failed attempts. Consider monitoring this IP.\n\n")
+                elif count <= 7: f.write(f"Severity: 🟠🟠🟠🟠⚫ HIGH -- {count} failed attempts. Consider blocking this IP.\n\n")
+                else: f.write(f"Severity: 🔴🔴🔴🔴🔴 VERY HIGH -- {count} failed attempts. TAKE IMMEDIATE ACTION!\n\n")
                 f.write(f"****** END SUMMARY: {ip} ******\n")
+                f.write(
+                    "\n❗::: The above results are meant for analytical purposes only. Please verify the type of device\n"
+                    "by using a IP scanner to identify a recognizable host name for each IP address logged in auth.log.\n"
+                    "NEVER assume that a high number login attempts from an IP address is safe.\n"
+                    "This could potentially point to an attempted brute-force attack if you don't recognize\nthe host name identified by your IP scanner. "
+                    "Please utilize this information above to\nimplement additional security features as needed.")
+        print("✅ ::: Report generated! Details: \n-------------------------------------------------------------")
+        with open("IP-THREAT-DETECTOR_results.rpt", 'r') as f: print(f.read())
+        print("-------------------------------------------------------------")
+        print("How you should respond by severity:")
+        print("🟢🟢⚫⚫⚫ LOW SEVERITY: No further action required. Run this tool as often as you normally would.\n"
+              "However, if you do not recognize the IP address associated with the login attempts, monitor it more closely.\n")
+        print("🟡🟡🟡⚫⚫ MODERATE SEVERITY: Enhanced monitoring is encouraged. If entirely uncertain about the device\n"
+              "associated with the IP address trying to log in, consider blocking it. Run this tool more often.\n")
+        print("🟠🟠🟠🟠⚫ HIGH SEVERITY: Block the IP address associated with the login attempts right away.\n"
+              "The person using the device associated with the logged IP address likely indicates an attempted brute-force attack.\n")
+        print("🔴🔴🔴🔴🔴 VERY HIGH SEVERITY: Block the IP address associated with the login attempts immediately.\n"
+              "Do not assume that this behavior is ever safe. If required, create an additional report documenting the\n"
+              "suspicious activity from the device associated with this IP address.")
+        print("-------------------------------------------------------------")
         time.sleep(interval)
