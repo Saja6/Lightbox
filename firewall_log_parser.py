@@ -7,9 +7,8 @@ from collections import defaultdict
 import smtplib
 from email.message import EmailMessage
 # the following regexes will assist in finding entries in the log file which indicate allowed and blocked traffic:
-blockPattern = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+-\d{2}:\d{2}) pi kernel: \[UFW BLOCK\] IN=(\S+) OUT= MAC=([0-9a-fA-F:]+) SRC=(\d{1,3}(?:\.\d{1,3}){3})(?:.*PROTO=(\w+))?(?:.*SPT=(\d+))?(?:.*DPT=(\d+))?'
-allowPattern = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+-\d{2}:\d{2}) pi kernel: \[UFW ALLOW\] IN=\S* OUT=\S* SRC=(\d{1,3}(?:\.\d{1,3}){3}) DST=(\d{1,3}(?:\.\d{1,3}){3})(?:.*PROTO=(\w+))?(?:.*SPT=(\d+))?(?:.*DPT=(\d+))?'
-
+blockPattern = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+-\d{2}:\d{2})\s+\S+\s+\S+:\s+\[UFW BLOCK\]\s+IN=(\S+)\s+OUT=\s+MAC=([0-9a-fA-F:]+)\s+SRC=(\d{1,3}(?:\.\d{1,3}){3})(?:.*?PROTO=(\w+))?(?:.*?SPT=(\d+))?(?:.*?DPT=(\d+))?'
+allowPattern = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d+\.\d+-\d{2}:\d{2})\s+\S+\s+\S+:\s+\[UFW ALLOW\]\s+IN=\S*\s+OUT=\S*\s+SRC=(\d{1,3}(?:\.\d{1,3}){3})\s+DST=(\d{1,3}(?:\.\d{1,3}){3})(?:.*?PROTO=(\w+))?(?:.*?SPT=(\d+))?(?:.*?DPT=(\d+))?'
 # we will parse a firewall log that contains information about traffic going through it.
 # @param: none
 # @return: an array of dictionaries, each of which map parsed
@@ -69,9 +68,10 @@ def loghunt():
 if __name__ == '__main__':
     # VARIABLES
     interval = 1800 # we will wait 30 minutes until parsing the firewall log again.
-    MyEmail = "EMAIL # change this to your gmail address!
+    MyEmail = "EMAIL" # change this to your gmail address!
     MyAppPass = "AAAA BBBB CCCC DDDD" # change this to your google app password!
     while True:
+        print(f"🔥::: Now parsing firewall log...")
         eventList = loghunt()
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") # we will create individual snapshots
         jsonfile = f"results_{timestamp}.json"
@@ -87,8 +87,16 @@ if __name__ == '__main__':
             for ip, count in attempts.items():
                 f.write(f"**** BEGIN SUMMARY FOR {ip} ****\n")
                 # below, count the number of times BLOCK or ALLOW appears in each tuple in the map
-                f.write(f"SOURCE {ip} | COUNT {count} | [BLOCK]: {eventtypes[ip].count('BLOCK')} | [ALLOW]: {eventtypes[ip].count('ALLOW')}")
+                f.write(f"🔎 SOURCE: {ip}:\n\t📝 ACTIONS COUNTED: {count}\n\t🛑 [BLOCK]: {eventtypes[ip].count('BLOCK')}\n\t🟢 [ALLOW]: {eventtypes[ip].count('ALLOW')}")
                 f.write(f"\n**** END SUMMARY FOR {ip} ****\n\n")
+            f.write("❗::: The above results are meant for analytical purposes only. Please verify the type of device\n"
+                "by using a port scanner to identify a recognizable host name for each IP address logged in ufw.log.\n"
+                "NEVER assume that traffic from an IP address that has been continuously allowed is safe.\n"
+                "This could potentially point to unauthorized network access if you don't recognize\nthe host name identified by your port scanner. "
+                "Please utilize this information above to\nimplement additional security features as needed.")
+        print("✅ ::: Report generated! Details: \n-------------------------------------------------------------")
+        with open("results.rpt", "r") as f: print(f.read())
+        print("-------------------------------------------------------------")
         # if you do not need emailing functions and features, comment out lines 72, 73, as well as lines 93 to 100.
         message = EmailMessage() # make a new email object and set its contents (below)
         message["Subject"] = "Firewall Log Parser Results"
@@ -98,5 +106,5 @@ if __name__ == '__main__':
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s: # google's SMTP client operates on port #465.
             s.login(MyEmail, MyAppPass)
             s.send_message(message)
-        print(f"::: Firewall log parse complete.")
+        print(f"✅ ::: Firewall log parse complete!")
         time.sleep(interval)
