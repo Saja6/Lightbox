@@ -10,9 +10,9 @@ from email.message import EmailMessage
 # @return: nothing
 def startService(portNumber):
     # VARIABLES:
-    MyEmail = "stephjay442@gmail.com" # change this to your email!
-    MyAppPass = "irmx sdjj czuc jlum" # change this to your google app password!
-    print(f"::: Now activating honeypot on {portNumber}.")
+    MyEmail = "EMAIL" # change this to your email!
+    MyAppPass = "AAAA BBBB CCCC DDDD" # change this to your google app password!
+    print(f"🪤 ::: Now activating honeypot on {portNumber}.")
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('', portNumber))
         s.listen()
@@ -20,7 +20,7 @@ def startService(portNumber):
         while True:
             conn, addr = s.accept()
             with conn:
-                print("Connection made by:", addr)
+                print("🚨 ::: Connection made by:", addr)
                 conn.sendall(b"SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5\r\n") # send the service name over
                 with open("results.rpt", "a") as f:
                     f.write(f"**** BEGIN SUMMARY: {addr} ****\n")
@@ -28,7 +28,7 @@ def startService(portNumber):
                         data = conn.recv(1024)
                         if not data: break
                         timestamp = datetime.datetime.now().strftime("%B %d %Y at %I:%M %p")
-                        f.write(f"Data received: {data!r} at {timestamp}\n")
+                        f.write(f"📃 ::: Data received: {data!r} at {timestamp}\n")
                     f.write(f"**** END SUMMARY: {addr} ****\n\n")
                 # if you don't need emailing features, comment out lines 13, 14, and lines 34 to 41
                 message = EmailMessage()
