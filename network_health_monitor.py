@@ -51,7 +51,7 @@ def testDNSlookup(DNS_IP, website):
         return elapsed
     except Exception as e:
         print(f"\n::: DNS lookup failed: {e}\n")
-        return False
+        return None
 
 # We will send an HTTPS request to a website and see if it succeeded.
 # @param: the website in the form of https://WEBSITE.com to use.
@@ -63,6 +63,9 @@ def testHTTPSrequest(website):
         if result.ok: # is the result a good one? we did alright then.
             print(f"\n::: HTTPS request succeeded\n")
             return True
+        else:
+            print(f"\n::: HTTPS request failed with status {result.status_code}\n")
+            return False
     except Exception as e:
         print(f"\n::: HTTP request failed: {e}\n")
         return False
@@ -102,6 +105,7 @@ def testLatency(DNS_IP, website):
     except Exception as e:
         print(f"\n::: One or more latency tests failed: {e}\n")
         print("::: Latency tests complete.\n")
+        return None, None, None
 
 if __name__ == "__main__":
     # GLOBAL VARIABLES:
@@ -129,29 +133,34 @@ if __name__ == "__main__":
             f.write("* AVAILABILITY TESTS:\n")
             routerText = "Router ping test: SUCCESSFUL" if routerResult == True else "Router ping test: FAILED"
             DNSServerText1 = "DNS server ping test: SUCCESSFUL" if DNSServerResult == True else "DNS server ping test: FAILED"
-            DNSServerText2 = f"DNS lookup speed: {DNSLookupResult:.2f} ms" if DNSLookupResult else "DNS lookup speed: FAILED"
-            HTTPStext = "HTTPS request test: SUCCESSFUL" if HTTPSresult == True else "HTTP request test: FAILED"
+            DNSServerText2 = f"DNS lookup speed: {DNSLookupResult:.2f} ms" if DNSLookupResult is not None else "DNS lookup speed: FAILED"
+            HTTPStext = "HTTPS request test: SUCCESSFUL" if HTTPSresult == True else "HTTPS request test: FAILED"
             f.write(routerText + "\n")
             f.write(DNSServerText1 + "\n")
             f.write(DNSServerText2 + "\n")
             f.write(HTTPStext + "\n\n")
             f.write("* TRANSMISSION SPEED TESTS:\n")
-            f.write(f"Network upload speed: {uploadSpeed:.2f} Mb/s\n")
-            f.write(f"Network download speed: {downloadSpeed:.2f} Mb/s\n\n")
+            uploadText = f"{uploadSpeed:.2f} Mb/s" if uploadSpeed is not None else "FAILED"
+            downloadText = f"{downloadSpeed:.2f} Mb/s" if downloadSpeed is not None else "FAILED"
+            f.write(f"Network upload speed: {uploadText}\n")
+            f.write(f"Network download speed: {downloadText}\n\n")
             f.write("* LATENCY TESTS:\n")
-            f.write(f"Ping latency: {pingLatency:.2f} ms\n")
-            f.write(f"HTTP latency: {HTTPSLatency:.2f} ms\n")
-            f.write(f"TCP latency: {TCPLatency:.2f} ms\n")
+            pingText = f"{pingLatency:.2f} ms" if pingLatency is not None else "FAILED"
+            httpsText = f"{HTTPSLatency:.2f} ms" if HTTPSLatency is not None else "FAILED"
+            tcpText = f"{TCPLatency:.2f} ms" if TCPLatency is not None else "FAILED"
+            f.write(f"Ping latency: {pingText}\n")
+            f.write(f"HTTP latency: {httpsText}\n")
+            f.write(f"TCP latency: {tcpText}\n")
             f.write("**** END NETWORK HEALTH SUMMARY ****\n")
         print(f"::: Network health tests completed. Results are stored in: {os.path.abspath(filename)}\n")
         print("::: Please wait 30 minutes for the next network health test.\n")
-        # if you do not need emailing functions and features, comment out lines 111, 112, as well as lines 149 to 156.
-        message = EmailMessage() # make an email message object and populate its fields:
-        message["Subject"] = "Network Health Results"
-        message["From"] = MyEmail
-        message["To"] = MyEmail
-        with open(filename) as f: message.set_content(f.read()) # set the email content
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s: # smtp.gmail.com is the Gmail server, and SMTP operates on port 465.
-            s.login(MyEmail, MyAppPass)
-            s.send_message(message)
+       # if you  need emailing functions and features, uncomment out the lines below:
+       # message = EmailMessage() # make an email message object and populate its fields:
+       # message["Subject"] = "Network Health Results"
+       # message["From"] = MyEmail
+       # message["To"] = MyEmail
+       # with open(filename) as f: message.set_content(f.read()) # set the email content
+       #  with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s: # smtp.gmail.com is the Gmail server, and SMTP operates on port 465.
+       #     s.login(MyEmail, MyAppPass)
+       #     s.send_message(message)
         time.sleep(1800) # we will perform these tests every half hour.
