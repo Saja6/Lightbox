@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import datetime
-targets = ["/Users/sj/Downloads"]  # the directories we will compute file hashes inside are here (add yours).
+targets = [""]  # the directories we will compute file hashes inside are here (add yours).
 
 # we will walk each directory in the list of targets recursively and compute a hash for each file inside it
 #   @param: none
