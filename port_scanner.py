@@ -1,29 +1,42 @@
+import platform
 import socket
+import subprocess
 import sys
 
 # we will scan ports over the designated range
-# @param: the range of ports such as (1, 1024) to scan
-# @return: the list of ports open on a device with an IP address, otherwise an empty list.
-def scanPorts(portRange):
-    IPs = ["192.168.1.1"] # add as many IPs whose ports will be scanned as need be.
+# @param: the range of ports such as (1, 1024) to scan as well as the list of IPs to scan
+# @return: the list of ports open on a device with an IP address, which may be empty
+def scanPorts(portRange, IPs):
     openPorts = [] # a list containing dictionaries with each IP mapped to its open ports list
+    commandFlag = "-n" if platform.system() == "Windows" else "-c"
     for ip in IPs:
+        try:
+            print(f"🕒 ::: Assessing availability of host \"{ip}\"...")
+            result = subprocess.run(["ping", commandFlag, "2", ip], shell=False, check=True, timeout=5, capture_output=True, text=True)
+        except subprocess.TimeoutExpired:
+            print(f"🔴 ::: Ping timed out: \"{ip}\"")
+            continue
+        except subprocess.CalledProcessError:
+            print(f"🔴 ::: No respone from host: \"{ip}\"")
+            continue
+        except OSError as e:
+            print(f"🔴 ::: Failed to execute ping for \"{ip}\": {e}")
+            continue
         openPortsOnIP = []  # a list of all open ports associated with an IP address
+        print(f"🟢 ::: Host \"{ip}\" is reachable.")
         print(f"🕒 ::: Scanning ports on {ip}...")
         for port in portRange:
             print(f"🕒 ::: Scanning port #{port} on {ip}")
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.settimeout(0.01) # wait for this long before timing out
+                s.settimeout(0.5) # wait for this long before timing out
                 target = (ip, port)
                 try:
                     result = s.connect_ex(target) # try to connect to the target
                     if result == 0:
                         print(f"🟢 ::: Found open port: Port #{port} is open on {ip}")
                         openPortsOnIP.append(port)
-                except socket.gaierror:
-                    print(f"::: Could not resolve hostname/IP: {ip}")
-                    break
-                except Exception as e: pass
+                except OSError as e:
+                    print(f"🔴 ::: Error while scanning {ip}:{port}: {e}")
         result = {
             "IP": ip,
             "Ports": openPortsOnIP,
@@ -42,8 +55,11 @@ if __name__ == "__main__":
           "Please enter 'C' to continue with the port scan, otherwise enter any other key to exit:\n")
     entry = input("Continue? [C/c] ")
     if entry == "C" or entry == "c":
-        # pass a range or custom list of ports to scan
-        openPorts = scanPorts(range(1,10))
+        print("::: Enter the number of ports you would like to scan. This port scanner will\n\tscan the number of ports from 1 all the way to the port number\n\tthat you enter.\n")
+        numberOfPorts = input("Enter the maximum port number to scan up to (such as 1024): ")
+        IPs = input("::: Enter the IP addresses you would like to scan (separated by spaces): ")
+        formattedIPs = IPs.split()
+        openPorts = scanPorts(range(1, int(numberOfPorts) + 1), formattedIPs)
         print("--------------------------------\n✅ ::: Port scan complete! Results:")
         if openPorts != []:
             for result in openPorts:
