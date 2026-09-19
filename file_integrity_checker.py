@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import datetime
-targets = ["/MY/CHOSEN/DIRECTORY/"] # the directories we will compute file hashes inside are here (add yours).
+targets = ["DIRECTORIES"] # the directories we will compute file hashes inside are here (add yours).
 # we will walk each directory in the list of targets recursively and compute a hash for each file inside it
 #   @param: none
 #   @return: the modified hashMap variable containing the
@@ -64,6 +64,7 @@ def loadMap():
 #       whereas the new map contains the hashes generated after writing the old map's hashes to the file.
 #   @return: a tuple containing the type of action, the path to file, and the old hash and path stored on
 #       file in the new map (if needed).
+    
 def compareHashes(oldMap, newMap):
     print("🕒 ::: Comparing hashes to stored hashes...")
     changes = []
