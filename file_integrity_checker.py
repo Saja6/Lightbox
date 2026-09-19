@@ -44,6 +44,21 @@ def writeMap(map):
         for fileName, hash in map.items():
             f.write(fileName + ' | ' + hash + '\n')
 
+# we will load the map from the file 
+#    @param: nothing.
+#    @return: the hashMap read from the file.
+def loadMap():
+    hashMap = {}
+    try:
+        with open("hashes.log", "r") as f:
+            for line in f:
+                line = line.rstrip("\n")
+                if not line: continue
+                fileName, fileHash = line.split(" | ", 1)
+                hashMap[fileName] = fileHash
+    except FileNotFoundError: return {}
+    return hashMap
+
 # we will compare the 2 hashMaps to verify file integrity and to detect new or deleted entries.
 #   @param: 2 hashMaps, and old and new one. The old map contains the hashes that exist in hashes.log,
 #       whereas the new map contains the hashes generated after writing the old map's hashes to the file.
@@ -71,24 +86,26 @@ if __name__ == '__main__':
           "please enter 'C' to continue with the file integrity check for your required directories.\n"
           "Otherwise, please press any other key to exit the program.\n")
     entry = input("Continue? [C/c]: ")
-    if entry == "C" or entry == "c":
-        baselineMap = computeHashes()
+    if entry.lower() == "c":
+        baselineMap = loadMap() # load a baseline map then compute the new hashes below.
+        newMap = computeHashes()
+        if not baselineMap:
+            print("⚠️ No baseline found. Creating baseline...")
+            writeMap(newMap)
+            print("✅ Baseline created.")
+            sys.exit(0)
+        results = compareHashes(baselineMap, newMap)
+        timestamp = datetime.datetime.now().strftime("%B %d %Y at %I:%M:%S %p")
         with open("results.rpt", "a") as f:
-            newMap = computeHashes()
-            results = compareHashes(baselineMap, newMap) # compare the computed hashes to what we have on file
-            timestamp = datetime.datetime.now().strftime("%B %d %Y at %I:%M:%S %p")
             if results:
-                for result in results: # iterate through the results and get its contents:
-                    action, filepath, oldhash, newhash = result[3], result[0], result[1], result[2]
+                for result in results:
+                    filepath, oldhash, newhash, action = result
                     print("------------------------------------------------")
-                    line = f"🚨::: File changes detected | {action} | {filepath} | {oldhash} | {newhash} on {timestamp}"
+                    line = (f"🚨::: File changes detected | {action} |{filepath} | {oldhash} | {newhash} on {timestamp}")
                     print(line)
-                    f.write(line)
+                    f.write(line + "\n")
             else:
-                print("------------------------------------------------")
-                line = f"✅ File integrity check complete! No outstanding changes detected at {timestamp}."
+                line = (f"✅ File integrity check complete! No outstanding changes detected at {timestamp}.")
                 print(line)
-                f.write(line)
-            f.flush()
-            baselineMap = newMap # update our map based off our findings
+                f.write(line + "\n") 
     else: sys.exit(1)
