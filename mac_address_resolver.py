@@ -3,6 +3,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from scapy.layers.l2 import getmacbyip
 import time
+from mac_vendor_lookup import MacLookup
 # we will scan a range of IP addresses over a subnet for MAC addresses reachable on our network.
 # @param: the IP address to scan
 # @return: a dictionary containing the IP address with its respective discovered MAC address.
@@ -51,26 +52,31 @@ if __name__ == "__main__":
         net = ipaddress.ip_network(net)
         hosts = net.hosts()
         macDictionary = {} # we will use this to map MAC addresses to all IPs they correspond to.
-        with ThreadPoolExecutor(max_workers = 4) as executor:
+        errors = []
+        with ThreadPoolExecutor(max_workers = 30) as executor:
             results = executor.map(resolveMac, hosts)
             for device in results:
-                if device and device["MAC Address"]:
+                if not device: continue
+                if device["MAC Address"]:
                     mac = device["MAC Address"].upper()
-                    IP = device["IP Address"]
-                    if mac not in macDictionary: macDictionary[mac] = [] # make an empty tuple to start
-                    macDictionary[mac].append(IP) # add a new IP into the list of IPs a MAC associates with it
-                elif device and device["Error"]:
-                    mac = device["MAC Address"].upper()
-                    IP = device["IP Address"]
-                    if mac not in macDictionary: macDictionary[mac] = [] # make an empty tuple to start
-                    macDictionary[mac].append(IP) # add a new IP into the list of IPs a MAC associates with it
+                    ip = device["IP Address"]
+                    if mac not in macDictionary: macDictionary[mac] = []
+                    macDictionary[mac].append(ip)
+                elif device["Error"]:
+                    errors.append(f"IP {device['IP Address']}: {device['Error']}")
         with open("mac_resolutions_report.txt", "w") as f:
             for mac, IPList in macDictionary.items():
+                try: vendor = MacLookup().lookup(mac)
+                except Exception: vendor = "Unknown vendor"
                 f.write(f"**** BEGIN SUMMARY FOR MAC ADDRESS: {mac} ****\n")
+                f.write(f"⭐ Vendor: {vendor}\n")
                 f.write(f"⭐ Total IPs bound to MAC address: {len(IPList)}\n")
                 f.write("⭐ Associated IPs: ")
                 for i in range(0, len(IPList), 7): f.write(", ".join(IPList[i:i + 7]) + "\n")
-                f.write(f"\n**** END SUMMARY FOR MAC ADDRESS: {mac} ****")
+                f.write(f"**** END SUMMARY FOR MAC ADDRESS: {mac} ****\n\n")
+            if errors:
+                f.write("**** UNRESOLVED / ERRORS ****\n")
+                for err in errors: f.write(f"❗{err}\n")
             print("✅ ::: MAC address resolving process completed! Details: \n")
         with open("mac_resolutions_report.txt", "r") as f: print(f.read())
     else: sys.exit(1)
