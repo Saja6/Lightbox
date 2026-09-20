@@ -1,0 +1,51 @@
+Welcome to the Official Lightbox GitHub Repository!
+
+If you have made it here, you have probably visited the website associated with this.
+I would like to personally thank you for visiting it as it details a majority
+of extracurricular work that I have done as an aspiring IT professional.
+As you visit this repository, it is worth noting a few things:
+
+1. BUGS AND MODIFICATIONS
+Nearly all projects in this repository are subject to significant change
+because there are several projects that may still have undiscovered bugs. If you
+use and run any of my code and encounter any bugs, email me right away at:
+stephjay442@gmail.com so that I can assess the effect the bug has on the script
+and fix it within reasonable time. If you have tested one of my scripts and
+find a bug in it, I will give credit to you in a list of bug hunters and
+script testers that will appear on this repository in a text file.
+
+2. DISTRIBUTION AND USE
+You are free to distribute, use, and edit my work as long as you give credit 
+to me as the original owner. My work is licensed under the GNU GPLv3 license,
+which in itself is also free and open-source and sets out the guidelines
+referring to the distribution and use of open-source code. 
+This license prohibits selling such work under a proprietary license. 
+Please read the GNU GPLv3 license attached to this repository, under LICENSE.
+
+3. PROJECT ENHANCEMENT
+No project in this repository may ever be truly finished.
+This mostly links back to the first point, except additional features
+may be added to any given project in the near future to enhance
+user experience and improve overall functionality and versatility.
+
+4. ADDITIONAL DOCUMENTATION
+In the event that this repository becomes too large,
+current and future content may disappear from immediate view 
+and be nested in various directories. While this is unlikely,
+documentation for each single project is a planned part of this
+repository that will serve as an introductory manual to the 
+tool that it concerns. In this case, directories containing
+both the relevant code and documentation will be made available
+as opposed to plain .cpp or .py files appearing unorganized.
+
+5. NOTICE OF RESPONSIBLE USE AND SAFETY
+Use my tools responsibly and professionally. Some of the 
+tools made available on this repository are capable of supporting
+both security analyst tasks and cyber attacking tasks.
+Such programs that have been evaluated to be potentially
+used in such manners have been modified to include a security
+disclaimer at the top of the terminal window upon execution.
+Do not use any tools that I have created in order to support
+missions in digital attacks on a scale ranging from the personal
+level to the enterprise level. Such activities are 
+punishable by State and Federal Law.
