@@ -2,22 +2,20 @@
 import hashlib
 import os
 import sys
-import time
 import datetime
-targets = [""]  # the directories we will compute file hashes inside are here (add yours).
 
 # we will walk each directory in the list of targets recursively and compute a hash for each file inside it
-#   @param: none
+#   @param: the list of user-defined directories to compute hashes for.
 #   @return: the modified hashMap variable containing the
 #       hashes relevant to each file used in each
 #       directory located in targets. if targets is empty,
 #       computeHashes() will return an empty hashMap.
-def computeHashes():
+def computeHashes(targets):
     print("🕒 ::: Computing hashes...")
     hashMap = {}  # here, a file path will be mapped to its corresponding computed hash
-    if targets == []: return {}
-    for thisTarget in targets:  # for each directory, we will walk recursively through it
-        for (root, directories, files) in os.walk(thisTarget, topdown=True):
+    if targets is None: return {}
+    for target in targets:
+        for (root, directories, files) in os.walk(target, topdown=True):
             for fileName in files:
                 try:
                     hasher = hashlib.sha256()  # compute an SHA256 hash
@@ -31,18 +29,16 @@ def computeHashes():
                     fileHash = hasher.hexdigest()  # allow the hash to be in hexadecimal for safety
                     hashMap[filePath] = fileHash  # next, make a new entry in the hashMap
                     print(f"✅ ::: Hash calculated for {fileName}...")
-                except (FileNotFoundError, PermissionError):
-                    continue
+                except (FileNotFoundError, PermissionError): continue
     print("✅ ::: Hash computation complete.")
     return hashMap
-
 
 # we will write our baseline hashMap results to a file called hashes.log.
 #   @param: hashMap
 #   @return: none.
 def writeMap(map):
     print("🕒 ::: Writing hashes to hashes.log...")
-    with open('hashes.log', 'w') as f:
+    with open("hashes.log", "w") as f:
         for fileName, hash in map.items():
             f.write(fileName + ' | ' + hash + '\n')
 
@@ -95,8 +91,16 @@ if __name__ == '__main__':
         "Otherwise, please press any other key to exit the program.\n")
     entry = input("Continue? [C/c]: ")
     if entry.lower() == "c":
+        targetDirectories = input("::: Enter the directory to perform the file integrity check: ")
+        existingDirectories = [] # a list which will contain only existing directories the user inputs.
+        for directory in targetDirectories.split():
+            if not os.path.exists(directory): print(f"🔴 ::: No such directory: {directory}")
+            else: existingDirectories.append(directory)
+        if not existingDirectories:
+            print("🔴 ::: No valid directories provided. Exiting.")
+            sys.exit(1)
         baselineMap = loadMap()  # load a baseline map then compute the new hashes below.
-        newMap = computeHashes()
+        newMap = computeHashes(existingDirectories)
         if not baselineMap:
             print("⚠️ No baseline found. Creating baseline...")
             writeMap(newMap)
