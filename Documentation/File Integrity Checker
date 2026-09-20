@@ -1,0 +1,39 @@
+Copyright 2026 Saja6: https://github.com/Saja6
+
+Fict: The File Integrity Checking Tool
+
+DESCRIPTION
+Fict is a lightweight command line script that performs checks 
+on the contents of a directory in order to determine if they were modified. 
+Additionally, it generates alerts regarding file changes if detected.
+
+GENERAL USE
+While it can be used on any directory, Fict works best on limited-access data sets 
+that are not routinely modified. To use Fict, follow these instructions:
+
+1. In the directory you have downloaded Fict in, run the command: “python3 file_integrity_checker.py”. 
+You will be greeted with an introductory message regarding suggestions regarding use.
+
+2. Press the ‘C’ key to continue.
+
+3. Next, Fict will ask you to enter a directory to perform the file integrity check. 
+You may enter a single directory on your system or a list of directories separated by a space. 
+Once finished, press the enter key to perform the file integrity check.
+
+4. The time taken by Fict to perform the integrity check may vary by directory size and contents. 
+During the first integrity check performed, Fict will create a baseline file containing the initial 
+files in your directories, each mapped to its own calculated SHA256 checksum. 
+This value is crucial in determining if the content in your directories has been modified, 
+as a single change in the document including adding/deleting a character, will alter the 
+entire checksum for the file. Additionally, Fict will analyze the directory in further 
+integrity checks for new or deleted files. 
+
+5. Access the file integrity results in the file named “results.rpt”. If the file 
+does not exist on the first integrity check, Fict will create it and allow it to
+be appended to after each subsequent file integrity check. Here, you will find all 
+relevant information pertaining to the analysis including any detected changes, if any exist.
+
+SUPPORT
+If you encounter any issues or bugs when using Fict, or have any questions regarding 
+general use of it, please email the creator at: stephjay442@gmail.com. 
+Your request will be answered as soon as possible in 1 - 2 days.
