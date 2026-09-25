@@ -1,0 +1,55 @@
+Copyright 2026 Saja6: https://github.com/Saja6
+
+Alsa: The Authentication Log Summarizer and Analyzer
+
+DESCRIPTION
+Alsa is a lightweight tool that turns authentication logs such as
+auth.log into human-readable statistics and information while
+offering automatic IP blocking via fail2ban.
+
+CONFIGURATION
+Alsa can be configured with its configuration file, named 'alsa.conf'.
+Here, you can alter the values of the fields to fit your needs:
+
+1. log-location: the name of the file to be parsed. Alsa will perform an absolute path
+check to determine its actual location on the machine, so the value of this variable
+should only be the name of the file, such as auth.log, and NOT /var/log/auth.log
+
+2. num-failed-attempts-required: the number of failed password attempts required to 
+perform an automatic fail2ban ban. If the number of blocks required is 0,
+then automatic fail2ban banning will not be used. Otherwise, all IP
+addresses recorded in the log file with associated failed login counts will be subject to 
+being used in a fail2ban request, denying them any way to remotely login.
+
+3. interval: the number of seconds that should elapse between each parses. If your interval
+is less than a minute, Alsa will generate a warning on screen notifying you about the 
+potential downsides to using a short interval. A recommended interval for general use
+is no less than 5 minutes unless more frequent authentication log parsing has been advised 
+as a security monitoring suggestion.
+
+4. target-jail: the name of the jail that fail2ban will use when banning IP addresses.
+You are free to name this whatever you want.
+
+GENERAL USE
+1. In the directory you have downloaded Alsa in, run the command: “python3 alsa.py”. 
+Ensure that alsa.conf is in the same directory as the script is.
+You will be greeted with an introductory message regarding suggestions regarding use.
+
+2. Press the ‘C’ key to continue.
+
+3. Alsa will automatically start parsing the authentication log and notify you when it has completed.
+If the interval set during configuration is greater than 0 seconds but less than 60 seconds,
+Alsa will warn you about using a short interval and ask if you would like to continue. 
+Otherwise, if the interval is longer, the message will not display and Alsa will let you know
+that it is waiting the designated interval before the next firewall log parse.
+
+4. After each parse, Alsa will generate a human-readable text report titled 'results.rpt' with
+the list of all discovered IP addresses and the number of failed logins associated with each. 
+The report is designed to be read and used in order to implement any additional security features if needed.
+Alternatively, if num-failed-attempts-required is greater than 0, an autmoatic IP ban will 
+be implemented using fail2ban.
+
+SUPPORT
+If you encounter any issues or bugs when using Alsa, or have any questions regarding 
+general use of it, please email the creator at: stephjay442@gmail.com. 
+Your request will be answered as soon as possible in 1 - 2 days.
