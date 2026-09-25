@@ -1,0 +1,59 @@
+Copyright 2026 Saja6: https://github.com/Saja6
+
+Flip: The Firewall Log Ingestion Program
+
+DESCRIPTION
+Flip is a lightweight program that turns firewall logs such as
+ufw.log into human-readable statistics and information while
+offering automatic network traffic blocking via UFW.
+
+CONFIGURATION
+Flip can be configured with its configuration file, named 'flip.conf'.
+Here, you can alter the values of the fields to fit your needs:
+
+1. logLocation: the name of the file to be parsed. Flip will perform an absolute path
+check to determine its actual location on the machine, so the value of this variable
+should only be the name of the file, such as ufw.log, and NOT /var/log/ufw.log
+
+2. num-blocks-required: the number of blocked network traffic incidents required to 
+perform an automatic firewall rule implementation. If the number of blocks required is 0,
+then automatic firewall rule implementation will not be used. Otherwise, all IP
+addresses recorded in the log file with their respective block counts will be subject to 
+being used in a firewall rule denying their incoming traffic.
+
+3. interval: the number of seconds that should elapse between each parses. If your interval
+is less than a minute, Fict will generate a warning on screen notifying you about the 
+potential downsides to using a short interval. A recommended interval for general use
+is no less than 5 minutes unless more frequent firewall log parsing has been advised 
+as a security monitoring suggestion.
+
+4. whitelist: a list of all IP address from which network traffic should never 
+be blocked. IP addresses in this field should be separated by a comma and
+should only be such IPs that you recognize. For example:
+
+whitelist=192.168.50.233, 192.168.9.9
+
+GENERAL USE
+1. In the directory you have downloaded Fict in, run the command: “python3 firewall_log_parser.py”. 
+Ensure that flip.conf is in the same directory as the script is.
+You will be greeted with an introductory message regarding suggestions regarding use.
+
+2. Press the ‘C’ key to continue.
+
+3. Flip will automatically start parsing the firewall log and notify you when it has completed.
+If the interval set during configuration is greater than 0 seconds but less than 60 seconds,
+Flip will warn you about using a short interval and ask if you would like to continue. 
+Otherwise, if the interval is longer, the message will not display and Flip will let you know
+that it is waiting the designated interval before the next firewall log parse.
+
+4. After each parse, Flip will generate a human-readable text report titled 'results.rpt' with
+the list of all discovered IP addresses in the firewall log and the actions taken on them.
+Additionally, a structured JSON report will be generated that provides further details pertaining
+to a parsed event such as the source port and destination port of network traffic, as well as the
+used network protocol, IP address sending the traffic, and MAC address. Both reports are designed
+to be read and used in order to implement any additional security features if needed.
+
+SUPPORT
+If you encounter any issues or bugs when using Flip, or have any questions regarding 
+general use of it, please email the creator at: stephjay442@gmail.com. 
+Your request will be answered as soon as possible in 1 - 2 days.
