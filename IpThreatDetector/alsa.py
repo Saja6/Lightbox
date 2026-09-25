@@ -138,5 +138,20 @@ if __name__ == '__main__':
                   "suspicious activity from the device associated with this IP address.")
             print("-------------------------------------------------------------")
             print(f"🕒 ::: Waiting designated interval of {interval} seconds before next parse...")
-            time.sleep(interval)
+            if 0 < interval <= 60:  # unusually short intervals may not be easy to work with, so check for it:
+                print("\n❗::: WARNING: Your interval between parses is unusually low (< 60 seconds).\n"
+                      "If you continue, you may end up with an undesirable, large amount of\n"
+                      "results that may become difficult to manage. If you are okay with this,\n"
+                      "Enter 'C' to continue, or any other key to exit the program and save results.\n")
+                entry = input("Continue? [C/c]: ")
+                if entry == "C" or entry == "c":
+                    print("✅ ::: User confirmed continuation.")
+                    print(f"🕧 ::: Waiting {interval} seconds before next parse...")
+                    time.sleep(interval)
+                else:
+                    sys.exit(1)
+            else:
+                print(f"🕧 ::: Waiting {interval} seconds before next parse...")
+                time.sleep(interval)
+            if interval == 0: sys.exit(0)
     else: sys.exit(1)
