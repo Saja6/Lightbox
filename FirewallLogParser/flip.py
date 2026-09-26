@@ -10,9 +10,6 @@ import time
 from collections import defaultdict
 import smtplib
 from email.message import EmailMessage
-# the following regexes will assist in finding entries in the log file which indicate allowed and blocked traffic:
-blockPattern = r'.*?\[UFW BLOCK\]\s+IN=(?P<in>\S*)\s+OUT=\S*\s+(?:MAC=(?P<mac>\S+)\s+)?SRC=(?P<src>\d{1,3}(?:\.\d{1,3}){3}).*?(?:PROTO=(?P<proto>\w+))?.*?(?:SPT=(?P<spt>\d+))?.*?(?:DPT=(?P<dpt>\d+))?'
-allowPattern = r'.*?\[UFW ALLOW\]\s+IN=(?P<in>\S*)\s+OUT=\S*\s+SRC=(?P<src>\d{1,3}(?:\.\d{1,3}){3})\s+DST=(?P<dst>\d{1,3}(?:\.\d{1,3}){3}).*?(?:PROTO=(?P<proto>\w+))?.*?(?:SPT=(?P<spt>\d+))?.*?(?:DPT=(?P<dpt>\d+))?'
 # we will parse a firewall log that contains information about traffic going through it.
 # @param: none
 # @return: an array of dictionaries, each of which map parsed
@@ -32,8 +29,12 @@ def loghunt(logLocation):
             if "T" in timestamp:
                 date = timestamp.split("T")[0]
                 timeString = timestamp.split("T")[1][:8]
+            elif timestamp:
+                parts = timestamp.rsplit(" ", 1)
+                date = parts[0]
+                timeString = parts[1] if len(parts) > 1 else None
             else:
-                date = timematch
+                date = None
                 timeString = None
             # make a dictionary and map all instances of constants or identifiers separated from their value by an '='
             keyvalues = dict(re.findall(r'(\b[A-Z_]+)=([^\s]*)', line))
