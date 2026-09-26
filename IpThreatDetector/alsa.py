@@ -4,7 +4,6 @@ import ipaddress
 import os
 import subprocess
 import sys
-import time
 from collections import defaultdict
 import re
 timePatten = r'(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+(?:[+-]\d{2}:\d{2}|Z)?)' # a regex for identifying the time of an attempted login
@@ -50,7 +49,6 @@ if __name__ == '__main__':
     config = {
         "log-location": "/var/log/auth.log",
         "num-failed-attempts-required": 5,
-        "interval": 300,
         "target-jail": "sshd"
     }
     try:
@@ -66,92 +64,68 @@ if __name__ == '__main__':
     # below configurations may end up as default if flip.conf was not found!
     logLocation = config.get("log-location", "/var/log/auth.log")
     numBlocks = int(config.get("num-failed-attempts-required", 5))
-    interval = int(config.get("interval", 60))
     targetJail = config.get("target-jail", "sshd")
     print(
         "::: Welcome to ALSA, the Authentication Log Summarizer & Analyzer!\n----------------------------------------------------------------\n❗ "
         "Use this tool in order to efficiently parse authentication logs and generate useful,\n"
         "information pertaining to them. You can always configure ALSA by editing.\n"
-        "its configuration file in \"alsa.conf\"\n"
+        "its configuration file in \"alsa.conf\".\n"
         "\n::: Your current configuration is:\n"
         f"\tLog to ingest: {os.path.abspath(logLocation)}\n"
-        f"\tNumber of blocks needed for automatic IP blocking: {numBlocks}\n"
-        f"\tInterval between parses: {interval} seconds\n"
-        "\nIf your configuration is complete, enter 'C' to continue.\nOtherwise, please press any other key to exit the program.\n")
-    entry = input("Continue? [C/c]: ")
-    if entry == "C" or entry == "c":
-        while True:
-            eventsByIP = defaultdict(list) # the events recorded by IP will be stored in this dictionary
-            for item in loghunt(logLocation):
-                ip = item[0]
-                eventsByIP[ip].append(item)
-            with open("results.rpt", 'w') as f:
-                for ip, items in eventsByIP.items():
-                    count = len(items)
-                    f.write(f"****** BEGIN SUMMARY: {ip} ******\n\n")
-                    f.write(f"{ip} has {count} failed attempts\n\n")
-                    for item in items:
-                        if item[0] == ip: f.write(f"{item[0]} on port {item[1]} attempted login on {item[2]} at {item[3]} on {item[4]}\n")
-                    # we will assign levels to suggested actions below and write them to the report.
-                    if count < 3: f.write(f"Severity: 🟢🟢⚫⚫⚫ LOW -- {count} failed attempts. No further action needed.\n\n")
-                    elif count <= 5: f.write(f"Severity: 🟡🟡🟡⚫⚫ MODERATE -- {count} failed attempts. Consider monitoring this IP.\n\n")
-                    elif count <= 7: f.write(f"Severity: 🟠🟠🟠🟠⚫ HIGH -- {count} failed attempts. Consider blocking this IP.\n\n")
-                    else: f.write(f"Severity: 🔴🔴🔴🔴🔴 VERY HIGH -- {count} failed attempts. TAKE IMMEDIATE ACTION!\n\n")
-                    f.write(f"****** END SUMMARY: {ip} ******\n")
-                f.write(
+        f"\tNumber of blocks needed for automatic IP blocking: {numBlocks}\n")
+    eventsByIP = defaultdict(list) # the events recorded by IP will be stored in this dictionary
+    for item in loghunt(logLocation):
+        ip = item[0]
+        eventsByIP[ip].append(item)
+    with open("results.rpt", 'w') as f:
+        for ip, items in eventsByIP.items():
+            count = len(items)
+            f.write(f"****** BEGIN SUMMARY: {ip} ******\n\n")
+            f.write(f"{ip} has {count} failed attempts\n\n")
+            for item in items:
+                if item[0] == ip: f.write(f"{item[0]} on port {item[1]} attempted login on {item[2]} at {item[3]} on {item[4]}\n")
+                # we will assign levels to suggested actions below and write them to the report.
+            if count < 3: f.write(f"Severity: 🟢🟢⚫⚫⚫ LOW -- {count} failed attempts. No further action needed.\n\n")
+            elif count <= 5: f.write(f"Severity: 🟡🟡🟡⚫⚫ MODERATE -- {count} failed attempts. Consider monitoring this IP.\n\n")
+            elif count <= 7: f.write(f"Severity: 🟠🟠🟠🟠⚫ HIGH -- {count} failed attempts. Consider blocking this IP.\n\n")
+            else: f.write(f"Severity: 🔴🔴🔴🔴🔴 VERY HIGH -- {count} failed attempts. TAKE IMMEDIATE ACTION!\n\n")
+            f.write(f"****** END SUMMARY: {ip} ******\n")
+        f.write(
                     "\n❗::: The above results are meant for analytical purposes only. Please verify the type of device\n"
                     "by using a IP scanner to identify a recognizable host name for each IP address logged in auth.log.\n"
                     "NEVER assume that a high number login attempts from an IP address is safe.\n"
                     "This could potentially point to an attempted brute-force attack if you don't recognize\nthe host name identified by your IP scanner. "
                     "Please utilize this information above to\nimplement additional security features as needed.")
-            if numBlocks > 0:
-                for ip, items in eventsByIP.items():
-                    count = len(items)
-                    if count >= numBlocks:
-                        if ip in alreadyBanned:
-                            print(f"✅ ::: IP \"{ip}\" is already banned, skipping.\n")
-                            continue
-                        print(f"🕧 ::: Enforcing automatic fail2ban IP blocking for {ip} (Blocked {count} times)...")
-                        try: ipaddress.ip_address(ip)
-                        except ValueError:
-                            print(f"🛑 ::: \"{ip}\" is not a valid IP address. Skipping block...")
-                            continue
-                        try: # automate our work by implementing the fail2ban rule!
-                            command = ["sudo", "fail2ban-client", "set", targetJail, "banip", ip]
-                            subprocess.run(command, check = True, capture_output = True, text = True)
-                            alreadyBanned.add(ip)
-                            print(f"✅ ::: Successfully banned \"{ip}\" in jail {targetJail}!")
-                        except subprocess.CalledProcessError as e:
-                            print(f"🛑 ::: Failed to block IP address \"{ip}\": {e.stderr.strip()}")
-            print("✅ ::: Report generated! Details: \n-------------------------------------------------------------")
-            with open("results.rpt", 'r') as f: print(f.read())
-            print("-------------------------------------------------------------")
-            print("How you should respond by severity:")
-            print("🟢🟢⚫⚫⚫ LOW SEVERITY: No further action required. Run this tool as often as you normally would.\n"
+    if numBlocks > 0:
+        for ip, items in eventsByIP.items():
+            count = len(items)
+            if count >= numBlocks:
+                if ip in alreadyBanned:
+                    print(f"✅ ::: IP \"{ip}\" is already banned, skipping.\n")
+                    continue
+                print(f"🕧 ::: Enforcing automatic fail2ban IP blocking for {ip} (Blocked {count} times)...")
+                try: ipaddress.ip_address(ip)
+                except ValueError:
+                    print(f"🛑 ::: \"{ip}\" is not a valid IP address. Skipping block...")
+                    continue
+                try: # automate our work by implementing the fail2ban rule!
+                    command = ["sudo", "fail2ban-client", "set", targetJail, "banip", ip]
+                    subprocess.run(command, check = True, capture_output = True, text = True)
+                    alreadyBanned.add(ip)
+                    print(f"✅ ::: Successfully banned \"{ip}\" in jail {targetJail}!")
+                except subprocess.CalledProcessError as e:
+                    print(f"🛑 ::: Failed to block IP address \"{ip}\": {e.stderr.strip()}")
+    print("✅ ::: Report generated! Details: \n-------------------------------------------------------------")
+    with open("results.rpt", 'r') as f: print(f.read())
+    print("-------------------------------------------------------------")
+    print("How you should respond by severity:")
+    print("🟢🟢⚫⚫⚫ LOW SEVERITY: No further action required. Run this tool as often as you normally would.\n"
                   "However, if you do not recognize the IP address associated with the login attempts, monitor it more closely.\n")
-            print("🟡🟡🟡⚫⚫ MODERATE SEVERITY: Enhanced monitoring is encouraged. If entirely uncertain about the device\n"
+    print("🟡🟡🟡⚫⚫ MODERATE SEVERITY: Enhanced monitoring is encouraged. If entirely uncertain about the device\n"
                   "associated with the IP address trying to log in, consider blocking it. Run this tool more often.\n")
-            print("🟠🟠🟠🟠⚫ HIGH SEVERITY: Block the IP address associated with the login attempts right away.\n"
+    print("🟠🟠🟠🟠⚫ HIGH SEVERITY: Block the IP address associated with the login attempts right away.\n"
                   "The person using the device associated with the logged IP address likely indicates an attempted brute-force attack.\n")
-            print("🔴🔴🔴🔴🔴 VERY HIGH SEVERITY: Block the IP address associated with the login attempts immediately.\n"
+    print("🔴🔴🔴🔴🔴 VERY HIGH SEVERITY: Block the IP address associated with the login attempts immediately.\n"
                   "Do not assume that this behavior is ever safe. If required, create an additional report documenting the\n"
                   "suspicious activity from the device associated with this IP address.")
-            print("-------------------------------------------------------------")
-            print(f"🕒 ::: Waiting designated interval of {interval} seconds before next parse...")
-            if 0 < interval <= 60:  # unusually short intervals may not be easy to work with, so check for it:
-                print("\n❗::: WARNING: Your interval between parses is unusually low (< 60 seconds).\n"
-                      "If you continue, you may end up with an undesirable, large amount of\n"
-                      "results that may become difficult to manage. If you are okay with this,\n"
-                      "Enter 'C' to continue, or any other key to exit the program and save results.\n")
-                entry = input("Continue? [C/c]: ")
-                if entry == "C" or entry == "c":
-                    print("✅ ::: User confirmed continuation.")
-                    print(f"🕧 ::: Waiting {interval} seconds before next parse...")
-                    time.sleep(interval)
-                else:
-                    sys.exit(1)
-            else:
-                print(f"🕧 ::: Waiting {interval} seconds before next parse...")
-                time.sleep(interval)
-            if interval == 0: sys.exit(0)
-    else: sys.exit(1)
+    print("-------------------------------------------------------------")
