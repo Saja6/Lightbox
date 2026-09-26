@@ -77,48 +77,45 @@ if __name__ == '__main__':
         "\n::: Your current configuration is:\n"
         f"\tLog to ingest: {os.path.abspath(logLocation)}\n"
         f"\tNumber of blocks needed for automatic IP blocking: {numBlocks}\n"
-        f"\tWhitelist: {whitelist}\n"
-        "\nIf your configuration is complete, enter 'C' to continue.\nOtherwise, please press any other key to exit the program.\n")
-    entry = input("Continue? [C/c]: ")
-    if entry == "C" or entry == "c":
-        print(f"🔥::: Now parsing firewall log...")
-        eventList = loghunt(logLocation)
-        jsonfile = "results.json"
-        with open(jsonfile, "w") as f: json.dump(eventList, f, indent = 4)
-        attempts = defaultdict(int) # make a dictionary for counting attempts per IP and associated actions like BLOCK
-        eventtypes = defaultdict(list)
-        for event in eventList:
-            source = event["Source"] # search up the source IP and event type
-            eventtype = event["EventType"]
-            attempts[source] += 1 # increment the attempt
-            eventtypes[source].append(eventtype)
-        with open("results.rpt", "w") as f:
-            for ip, count in attempts.items():
-                f.write(f"**** BEGIN SUMMARY FOR {ip} ****\n")
-                # below, count the number of times BLOCK or ALLOW appears in each tuple in the map
-                f.write(f"🔎 SOURCE: {ip}:\n\t📝 ACTIONS COUNTED: {count}\n\t🛑 [BLOCK]: {eventtypes[ip].count('BLOCK')}\n\t🟢 [ALLOW]: {eventtypes[ip].count('ALLOW')}")
-                f.write(f"\n**** END SUMMARY FOR {ip} ****\n\n")
-            f.write("❗::: The above results are meant for analytical purposes only. Please verify the type of device\n"
+        f"\tWhitelist: {whitelist}\n")
+    print(f"🔥::: Now parsing firewall log...")
+    eventList = loghunt(logLocation)
+    jsonfile = "results.json"
+    with open(jsonfile, "w") as f: json.dump(eventList, f, indent = 4)
+    attempts = defaultdict(int) # make a dictionary for counting attempts per IP and associated actions like BLOCK
+    eventtypes = defaultdict(list)
+    for event in eventList:
+        source = event["Source"] # search up the source IP and event type
+        eventtype = event["EventType"]
+        attempts[source] += 1 # increment the attempt
+        eventtypes[source].append(eventtype)
+    with open("results.rpt", "w") as f:
+        for ip, count in attempts.items():
+            f.write(f"**** BEGIN SUMMARY FOR {ip} ****\n")
+            # below, count the number of times BLOCK or ALLOW appears in each tuple in the map
+            f.write(f"🔎 SOURCE: {ip}:\n\t📝 ACTIONS COUNTED: {count}\n\t🛑 [BLOCK]: {eventtypes[ip].count('BLOCK')}\n\t🟢 [ALLOW]: {eventtypes[ip].count('ALLOW')}")
+            f.write(f"\n**** END SUMMARY FOR {ip} ****\n\n")
+        f.write("❗::: The above results are meant for analytical purposes only. Please verify the type of device\n"
                     "by using a port scanner to identify a recognizable host name for each IP address logged in ufw.log.\n"
                     "NEVER assume that traffic from an IP address that has been continuously allowed is safe.\n"
                     "This could potentially point to unauthorized network access if you don't recognize\nthe host name identified by your port scanner. "
                     "Please utilize this information above to\nimplement additional security features as needed.")
-        print("✅ ::: Report generated! Details: \n-------------------------------------------------------------")
-        with open("results.rpt", "r") as f: print(f.read())
-        print("-------------------------------------------------------------")
-        print(f"✅ ::: Firewall log parse complete!")
-        if numBlocks > 0:
-            for ip, events in eventtypes.items():
-                blockCount = events.count('BLOCK') # count number of times blocked
-                if blockCount >= numBlocks:
-                     if ip not in whitelist:
-                        print(f"🕧 ::: Enforcing network traffic block from {ip} (Blocked {blockCount} times)...")
-                        try: ipaddress.ip_address(ip)
-                        except ValueError:
-                            print(f"🛑 ::: \"{ip}\" is not a valid IP address. Skipping block...")
-                            continue
-                        try: # automate our work by implementing the firewall rule!
-                            subprocess.run(["sudo", "ufw", "deny", "from", ip], check = True, capture_output = True, text = True)
-                            print(f"✅ ::: Blocked network traffic from {ip}!")
-                        except subprocess.CalledProcessError as e:
-                            print(f"🛑 ::: Failed to block traffic from {ip}: {e.stderr.strip()}")
+    print("✅ ::: Report generated! Details: \n-------------------------------------------------------------")
+    with open("results.rpt", "r") as f: print(f.read())
+    print("-------------------------------------------------------------")
+    print(f"✅ ::: Firewall log parse complete!")
+    if numBlocks > 0:
+        for ip, events in eventtypes.items():
+            blockCount = events.count('BLOCK') # count number of times blocked
+            if blockCount >= numBlocks:
+                if ip not in whitelist:
+                    print(f"🕧 ::: Enforcing network traffic block from {ip} (Blocked {blockCount} times)...")
+                    try: ipaddress.ip_address(ip)
+                    except ValueError:
+                        print(f"🛑 ::: \"{ip}\" is not a valid IP address. Skipping block...")
+                        continue
+                    try: # automate our work by implementing the firewall rule!
+                        subprocess.run(["sudo", "ufw", "deny", "from", ip], check = True, capture_output = True, text = True)
+                        print(f"✅ ::: Blocked network traffic from {ip}!")
+                    except subprocess.CalledProcessError as e:
+                        print(f"🛑 ::: Failed to block traffic from {ip}: {e.stderr.strip()}")
