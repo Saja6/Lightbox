@@ -28,7 +28,7 @@ GENERAL USE
 In the directory you have downloaded Alsa in, run the command: “python3 alsa.py”. 
 Ensure that alsa.conf is in the same directory as the script is.
 Alsa will automatically start parsing the authentication log and notify you when it has completed.
-After each parse, Alsa will generate a human-readable text report titled 'results.rpt' with
+After each parse, Alsa will generate a structured JSON report titled "results.json" with
 the list of all discovered IP addresses and the number of failed logins associated with each. 
 The report is designed to be read and used in order to implement any additional security features if needed.
 Alternatively, if num-failed-attempts-required is greater than 0, an autmoatic IP ban will 
