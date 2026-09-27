@@ -1,0 +1,43 @@
+Copyright 2026 Saja6: https://github.com/Saja6
+
+Porthole: A small, efficient port scanner
+
+DESCRIPTION
+Port scanner is a lightweight port scanner that
+IT professionals can use to layout a network
+attack surface and identify open/exposed network ports.
+
+CONFIGURATION
+Porthole can be configured with its configuration file, named 'porthole.conf'.
+Here, you can alter the values of the fields to fit your needs:
+
+1. port-range: the range of ports to scan for exposed services. It will scan the endpoint
+ports as well, so for example, a port range of 1,1024 will can ports 1 to 1024, including 
+1 and 2024.
+
+2. threads: the of threads to use when executing Porthole. Multithreaded performance
+will speed up the port scan and deliver results of scanning thousands of ports in
+a matter of seconds as opposed to minutes.
+
+3. max-bytes: the total number of bytes that should be received from the connecting user
+in order to prevent an overload of unnecessary connection data. It is recommended to keep
+this value as a power of 2 and not too high. by default, the maximum bytes that Microbait
+will receive from connecting user is 64 KiB.
+
+4. ips: the list of comma-separated IP addresses to perform a port scan on. The range
+of ports scanned on each IP address will be that of the value held by the port-range variable.
+
+GENERAL USE
+In the directory you have downloaded Porthole in, run the command: “python3 porthole.py”. 
+Ensure that porthole.conf is in the same directory as the script is.
+Porthole will automatically start scanning ports on 1 IP at a time after the IP address
+has been validated and its availability has been assessed. Upon completion on all IP
+addresses specified, Porthole will create a list of ports identified as open and indicate
+the time it took for the scan to complete. For most, if not all scans, it is expected that
+the majority of ports scanned do not appear in the list of open ports, as this may indicate
+a vulnerable machine that has several areas susceptible to a cyberattack or unauthorized access.
+
+SUPPORT
+If you encounter any issues or bugs when using Porthole, or have any questions regarding 
+general use of it, please email the creator at: stephjay442@gmail.com. 
+Your request will be answered as soon as possible in 1 - 2 days.
