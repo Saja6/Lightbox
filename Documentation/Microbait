@@ -1,0 +1,43 @@
+Copyright 2026 Saja6: https://github.com/Saja6
+
+Microbait: A lightweight, stupidly simple honeypot
+
+DESCRIPTION
+Microbait is a lightweight honeypot that logs any
+connection data from connections instantiated by 
+outside users using tools like Netcat.
+
+CONFIGURATION
+Microbait can be configured with its configuration file, named 'microbait.conf'.
+Here, you can alter the values of the fields to fit your needs:
+
+1. port: the port number that Microbait will be listening for connections on. It is 
+highly recommended to use an unused port to avoid port collisions, which may 
+cause service accessibility issues on your system.
+
+2. service: the name of the service or service banner that will be sent over
+to the connected user after he or she instantiates a connection on the designated 
+port.
+
+3. max-bytes: the total number of bytes that should be received from the connecting user
+in order to prevent an overload of unnecessary connection data. It is recommended to keep
+this value as a power of 2 and not too high. by default, the maximum bytes that Microbait
+will receive from connecting user is 64 KiB.
+
+GENERAL USE
+In the directory you have downloaded Microbait in, run the command: “python3 microbait.py”. 
+Ensure that microbait.conf is in the same directory as the script is.
+Microbait will automatically start listening on the port you assigned it to
+listen on in its configuration file. It will continue to listen on this port as long
+as its maximum bytes to be received has not been equalled or exceeded, or as long as
+the user deploying it has not stopped or terminated it. When a connecting user
+has been detected, Microbait will inform you in the terminal it was launched in and 
+begin logging data it send over if it decides to do so. Additionally, Microbait will
+take note of the source IP address, the source port, and the time the connection was made.
+Once Microbait is finished, it will generate a structured JSON file detailing the connections
+along with the relevant data mentioned in the last sentence.
+
+SUPPORT
+If you encounter any issues or bugs when using Microbait, or have any questions regarding 
+general use of it, please email the creator at: stephjay442@gmail.com. 
+Your request will be answered as soon as possible in 1 - 2 days.
