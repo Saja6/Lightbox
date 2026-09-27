@@ -1,6 +1,7 @@
 # Copyright 2026 Saja6: https://github.com/Saja6
 import datetime
 import ipaddress
+import json
 import os
 import subprocess
 import sys
@@ -44,7 +45,11 @@ def loghunt(logPath):
 
 if __name__ == '__main__':
     attempts = defaultdict(int) # create an empty dictionary for our attempts
-    alreadyBanned = set()  # we will track which IPs we have banned already!
+    alreadyBanned = set()
+    if os.path.exists("banned.json"):
+        try:
+            with open("banned.json", "r") as f: alreadyBanned = set(json.load(f))
+        except (json.JSONDecodeError, ValueError): print("⚠️ ::: banned.json was corrupted or empty. Initializing new set.")
     # default configuration if none is found:
     config = {
         "log-location": "/var/log/auth.log",
@@ -74,34 +79,30 @@ if __name__ == '__main__':
         f"\tLog to ingest: {os.path.abspath(logLocation)}\n"
         f"\tNumber of blocks needed for automatic IP blocking: {numBlocks}\n")
     eventsByIP = defaultdict(list) # the events recorded by IP will be stored in this dictionary
+    results = []
     for item in loghunt(logLocation):
         ip = item[0]
         eventsByIP[ip].append(item)
-    with open("results.rpt", 'w') as f:
-        for ip, items in eventsByIP.items():
-            count = len(items)
-            f.write(f"****** BEGIN SUMMARY: {ip} ******\n\n")
-            f.write(f"{ip} has {count} failed attempts\n\n")
-            for item in items:
-                if item[0] == ip: f.write(f"{item[0]} on port {item[1]} attempted login on {item[2]} at {item[3]} on {item[4]}\n")
-                # we will assign levels to suggested actions below and write them to the report.
-            if count < 3: f.write(f"Severity: 🟢🟢⚫⚫⚫ LOW -- {count} failed attempts. No further action needed.\n\n")
-            elif count <= 5: f.write(f"Severity: 🟡🟡🟡⚫⚫ MODERATE -- {count} failed attempts. Consider monitoring this IP.\n\n")
-            elif count <= 7: f.write(f"Severity: 🟠🟠🟠🟠⚫ HIGH -- {count} failed attempts. Consider blocking this IP.\n\n")
-            else: f.write(f"Severity: 🔴🔴🔴🔴🔴 VERY HIGH -- {count} failed attempts. TAKE IMMEDIATE ACTION!\n\n")
-            f.write(f"****** END SUMMARY: {ip} ******\n")
-        f.write(
-                    "\n❗::: The above results are meant for analytical purposes only. Please verify the type of device\n"
-                    "by using a IP scanner to identify a recognizable host name for each IP address logged in auth.log.\n"
-                    "NEVER assume that a high number login attempts from an IP address is safe.\n"
-                    "This could potentially point to an attempted brute-force attack if you don't recognize\nthe host name identified by your IP scanner. "
-                    "Please utilize this information above to\nimplement additional security features as needed.")
+    for ip, items in eventsByIP.items():
+        count = len(items)
+        if count < 3: severity = "LOW"
+        elif count <= 5: severity = "MODERATE"
+        elif count <= 7: severity = "HIGH"
+        else: severity = "VERY HIGH"
+        entry = {
+            "IP address": ip,
+            "Count": count,
+            "Severity": severity,
+            "Actions": [f"{item[0]} on port {item[1]} attempted login on {item[2]} at {item[3]} on {item[4]}" for item in items]
+        }
+        results.append(entry)
+    with open("results.json", 'w') as f: json.dump(results, f, indent = 4)
     if numBlocks > 0:
         for ip, items in eventsByIP.items():
             count = len(items)
             if count >= numBlocks:
                 if ip in alreadyBanned:
-                    print(f"✅ ::: IP \"{ip}\" is already banned, skipping.\n")
+                    print(f"✅ ::: IP \"{ip}\" is already banned, skipping.")
                     continue
                 print(f"🕧 ::: Enforcing automatic fail2ban IP blocking for {ip} (Blocked {count} times)...")
                 try: ipaddress.ip_address(ip)
@@ -115,9 +116,8 @@ if __name__ == '__main__':
                     print(f"✅ ::: Successfully banned \"{ip}\" in jail {targetJail}!")
                 except subprocess.CalledProcessError as e:
                     print(f"🛑 ::: Failed to block IP address \"{ip}\": {e.stderr.strip()}")
-    print("✅ ::: Report generated! Details: \n-------------------------------------------------------------")
-    with open("results.rpt", 'r') as f: print(f.read())
-    print("-------------------------------------------------------------")
+    with open("banned.json", "w") as f: json.dump(list(alreadyBanned), f, indent = 4)
+    print("\n✅ ::: Report generated! \n-------------------------------------------------------------")
     print("How you should respond by severity:")
     print("🟢🟢⚫⚫⚫ LOW SEVERITY: No further action required. Run this tool as often as you normally would.\n"
                   "However, if you do not recognize the IP address associated with the login attempts, monitor it more closely.\n")
