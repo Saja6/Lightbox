@@ -7,6 +7,19 @@ Fict is a lightweight command line script that performs checks
 on the contents of a directory in order to determine if they were modified. 
 Additionally, it generates alerts regarding file changes if detected.
 
+CONFIGURATION
+Fict can be configured with its configuration file, named 'fict.conf'.
+Here, you can alter the values of the fields to fit your needs:
+
+1. hash-function: the name of the hash function to use in order to compute
+checksums for each file in the directories given. Fict supports 6 hash functions:
+MD5, SHA-1, SHA-224, SHA-256, SHA-384, and SHA-512. The desired hash function
+in the configuration file should be all lowercase.
+
+2. directories: the list of comma-separated directories subject to the file
+integrity check. It is recommended that these directories be limited-access
+or sensitive directories that may require daily monitoring.
+
 GENERAL USE
 While it can be used on any directory, Fict works best on limited-access data sets 
 that are not routinely modified. To use Fict, follow these instructions:
