@@ -31,12 +31,9 @@ GENERAL USE
 In the directory you have downloaded Fict in, run the command: “python3 flip.py”. 
 Ensure that flip.conf is in the same directory as the script is.
 Flip will automatically start parsing the firewall log and notify you when it has completed.
-After each parse, Flip will generate a human-readable text report titled 'results.rpt' with
-the list of all discovered IP addresses in the firewall log and the actions taken on them.
-Additionally, a structured JSON report will be generated that provides further details pertaining
+After each parse, Flip will generate a structured JSON report that provides details pertaining
 to a parsed event such as the source port and destination port of network traffic, as well as the
-used network protocol, IP address sending the traffic, and MAC address. Both reports are designed
-to be read and used in order to implement any additional security features if needed.
+used network protocol, IP address sending the traffic, and MAC address. 
 
 SUPPORT
 If you encounter any issues or bugs when using Flip, or have any questions regarding 
