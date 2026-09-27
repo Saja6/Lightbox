@@ -89,20 +89,6 @@ if __name__ == '__main__':
         eventtype = event["EventType"]
         attempts[source] += 1 # increment the attempt
         eventtypes[source].append(eventtype)
-    with open("results.rpt", "w") as f:
-        for ip, count in attempts.items():
-            f.write(f"**** BEGIN SUMMARY FOR {ip} ****\n")
-            # below, count the number of times BLOCK or ALLOW appears in each tuple in the map
-            f.write(f"🔎 SOURCE: {ip}:\n\t📝 ACTIONS COUNTED: {count}\n\t🛑 [BLOCK]: {eventtypes[ip].count('BLOCK')}\n\t🟢 [ALLOW]: {eventtypes[ip].count('ALLOW')}")
-            f.write(f"\n**** END SUMMARY FOR {ip} ****\n\n")
-        f.write("❗::: The above results are meant for analytical purposes only. Please verify the type of device\n"
-                    "by using a port scanner to identify a recognizable host name for each IP address logged in ufw.log.\n"
-                    "NEVER assume that traffic from an IP address that has been continuously allowed is safe.\n"
-                    "This could potentially point to unauthorized network access if you don't recognize\nthe host name identified by your port scanner. "
-                    "Please utilize this information above to\nimplement additional security features as needed.")
-    print("✅ ::: Report generated! Details: \n-------------------------------------------------------------")
-    with open("results.rpt", "r") as f: print(f.read())
-    print("-------------------------------------------------------------")
     print(f"✅ ::: Firewall log parse complete!")
     if numBlocks > 0:
         for ip, events in eventtypes.items():
