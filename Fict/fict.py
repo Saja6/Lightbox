@@ -135,19 +135,23 @@ if __name__ == '__main__':
         sys.exit(0)
     results = compareHashes(baselineMap, newMap)
     timestamp = datetime.datetime.now().strftime("%B %d %Y at %I:%M:%S %p")
-    with open(f"results{hashFunction}.rpt", "a") as f:
+    entries = [] # list of all entries for JSON file. If no changes are detected, it will be empty.
+    with open(f"results{hashFunction}.json", "a") as f:
         if results:
             for result in results:
                 filepath, oldhash, newhash, action = result
-                print("------------------------------------------------")
+                entry = {
+                    "File": filepath,
+                    "OldHash": oldhash,
+                    "NewHash": newhash,
+                    "Action": action
+                }
+                entries.append(entry)
                 line = (f"🚨::: File changes detected:\n\tAction: {action}\n\tFile path: {filepath}\n\tOld hash: {oldhash}\n\tNew hash: {newhash}\n\tTime detected:{timestamp}")
                 print(line)
-                f.write(line + "\n")
+            json.dump(entries, f, indent = 4)
         else:
-            line = (f"✅ File integrity check complete! No outstanding changes detected at {timestamp}.")
-            print("------------------------------------------------")
-            print(line)
-            f.write(line + "\n")
+            print(f"✅ File integrity check complete! No outstanding changes detected at {timestamp}.")
             # add a disclaimer about the use of md5 or sha1!
     if hashFunction == "sha1" or hashFunction == "md5":
         print(f"\n❗::: WARNING: You have chosen {hashFunction} as the hash function to use.\n"
