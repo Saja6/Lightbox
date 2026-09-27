@@ -33,7 +33,8 @@ files in your directories, each mapped to its own calculated checksum.
 This value is crucial in determining if the content in your directories has been modified, 
 as a single change in the document including adding/deleting a character, will alter the 
 entire checksum for the file. Additionally, Fict will analyze the directory in further 
-integrity checks for new or deleted files. 
+integrity checks for new or deleted files. If any changes are detected, then an additional
+JSON file will be generated detailing all of the changes detected.
 
 Access the file integrity results in the file named “results.json”, with the name
 of the hash function used coming after 'results' and before '.json'. If the file 
