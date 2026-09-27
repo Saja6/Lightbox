@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Malware.h"
+#include "Smallware.h"
 int main(int argc, const char * argv[]) {
     MW::Malware m;
     try {
