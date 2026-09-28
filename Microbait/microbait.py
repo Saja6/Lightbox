@@ -57,7 +57,7 @@ if __name__ == '__main__':
                     config[key.strip()] = val.strip()
     except FileNotFoundError:
         print("⚠️ ::: microbait.conf not found. Using default configurations...")
-    # below configurations may end up as default if flip.conf was not found!
+    # below configurations may end up as default if microbait.conf was not found!
     port = int(config.get("port", 2222))
     service = str(config.get("service", "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5"))
     maxbytes = int(config.get("max-bytes", 65536))
