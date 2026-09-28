@@ -66,7 +66,7 @@ if __name__ == '__main__':
                     config[key.strip()] = val.strip()
     except FileNotFoundError:
         print("⚠️ ::: alsa.conf not found. Using default configurations...")
-    # below configurations may end up as default if flip.conf was not found!
+    # below configurations may end up as default if alsa.conf was not found!
     logLocation = config.get("log-location", "/var/log/auth.log")
     numBlocks = int(config.get("num-failed-attempts-required", 5))
     targetJail = config.get("target-jail", "sshd")
