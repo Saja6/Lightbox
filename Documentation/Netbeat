@@ -1,0 +1,56 @@
+Copyright 2026 Saja6: https://github.com/Saja6
+
+Netbeat: A tiny, automated network testing suite
+
+DESCRIPTION
+Netbeat is an automated network testing script that
+runs a variety of networking tests to assess hardware,
+host and service availability.
+
+CONFIGURATION
+Netbeat can be configured with its configuration file, named 'netbeat.conf'.
+Here, you can alter the values of the fields to fit your needs:
+
+1. router-ip: the IP address of your router. In most cases, this value should
+be either 192.168.0.1 or 192.168.1.1. Verify your router's IP address
+is correct before running Netbeat as virtually all tests will fail
+in the absence of a reliable internet gateway.
+
+2. dns-ip: the IP address of your DNS server In some instances, this may be the 
+same IP address as your router because many routers also provide DNS services.
+However, if you are using a public DNS server, such as the one provided by Cloudflare 
+or Google, enter that IP address as the value for this variable.
+
+3. test-website: the name of the website which will be used in an availability test involving
+sending an HTTPS request to it. Do not include "http://" or "https://" in this variable's value
+as it is not needed; only the name of the website without it. Including the HTTP or HTTPS
+beginnings in the variable's name will cause name conflicts when trying to send an HTTPS request
+to the website.
+
+4. log-name: the name of the JSON file to write the results of the network test to.
+Do not include the ".json" extension in the name of the variable's value as this will cause
+the file name to have a double file extension.
+
+5. timeout: the number of seconds to wait before giving up on a particular network test. 
+A shorter timeout value is recommended for optimal performance and quicker assessment
+of website availability.
+
+GENERAL USE
+In the directory you have downloaded Netbeat in, run the command: “python3 netbeat.py”. 
+Ensure that netbeat.conf is in the same directory as the script is.
+Netbeat will start the network health tests immediately and will display relevant 
+output to the console regarding the status, completion, or failure of a particular
+network health test. There are a total of 6 network health tests, with each varying
+in specified tasks including testing hardware availability, network latency, and
+download and upload speeds over the network. It is worth noting that Netbeat
+will not perform a test DNS lookup in the event that the DNS server ping test failed.
+Additionally, any errors that happen during the network health tests will appear on screen.
+After all the tests have run, Netbeat will generate a JSON file containing a structured list
+of the network health test performed and their resulting outcomes. Read this file
+in order to understand the general health of your network and implement any networking 
+solutions or troubleshoot any networking issues as needed.
+
+SUPPORT
+If you encounter any issues or bugs when using Netbeat, or have any questions regarding 
+general use of it, please email the creator at: stephjay442@gmail.com. 
+Your request will be answered as soon as possible in 1 - 2 days.
