@@ -96,7 +96,7 @@ if __name__ == '__main__':
             "Actions": [f"{item[0]} on port {item[1]} attempted login on {item[2]} at {item[3]} on {item[4]}" for item in items]
         }
         results.append(entry)
-    with open("results.json", 'w') as f: json.dump(results, f, indent = 4)
+    with open("results.json", 'a') as f: json.dump(results, f, indent = 4)
     if numBlocks > 0:
         for ip, items in eventsByIP.items():
             count = len(items)
