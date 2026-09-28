@@ -3,16 +3,19 @@ Copyright 2026 Saja6: https://github.com/Saja6
 SMALLWARE:
 
 PLEASE READ CAREFULLY:
-This project showcases how a very small amount of C++ code can recursively delete the contents of a directory, 
-illustrating how minimal logic can produce catastrophic effects when executed with sufficient permissions.
+Smallware is a C++ program that showcases how a very small amount of code can recursively delete the contents of a directory, 
+illustrating how very little it takes to produce catastrophic effects when executed with sufficient permissions.
 
 The goal of this demonstration is to raise awareness about filesystem safety, 
 least‑privilege design, and the importance of secure coding practices. 
-The program is intentionally destructive and should only be reviewed for educational purposes.
+The program is intentionally destructive and should only be reviewed and used for educational or research purposes.
 
-Do not run this code on any system containing real data.  
+Do not run this code on any system containing real, valuable, or personal data.  
 Do not distribute or share this code to anyone in favor of carrying out an attack.
-Execute only in a controlled, disposable environment.
-It is YOUR responsibility to ensure that this code is used safely, professionally, and educationally
+Execute only in a controlled, disposable environment such as a virtual machine.
+It is YOUR responsibility to ensure that this code is used safely, professionally, and educationally.
 
-Copy all of the files in this directory into a controlled environment and run with your own makefile.
+Download all of the files located in the Smallware directory, then put them inside a dedicated folder on your device.
+Once you have created a Makefile or ran g++, execute it. It should not take very long for the program to finish.
+Upon rebooting your VM or test environment, there is a possibility that the system may not complete its boot cycle
+provided a working directory fed to the program is sufficient enough.
