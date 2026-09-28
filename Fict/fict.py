@@ -103,7 +103,7 @@ if __name__ == '__main__':
                     config[key.strip()] = val.strip()
     except FileNotFoundError:
         print("⚠️ ::: fict.conf not found. Using default configurations...")
-    # below configurations may end up as default if flip.conf was not found!
+    # below configurations may end up as default if fict.conf was not found!
     hashFunction = config.get("hash-function", "sha256")
     targetDirectories = [directory.strip() for directory in config.get("directories", "").split(",") if directory.strip()]
     print(
