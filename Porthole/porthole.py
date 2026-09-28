@@ -75,7 +75,7 @@ if __name__ == "__main__":
                     elif key == "ips": config[key] = [ip.strip() for ip in val.split(",") if ip.strip()]
     except FileNotFoundError:
         print("⚠️ ::: porthole.conf not found. Using default configurations...")
-    # below configurations may end up as default if flip.conf was not found!
+    # below configurations may end up as default if porthole.conf was not found!
     portStart, portEnd = config["port-range"]
     portRange = range(portStart, portEnd + 1)
     timeout = config["timeout"]
