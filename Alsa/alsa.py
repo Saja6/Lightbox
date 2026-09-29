@@ -46,9 +46,9 @@ def loghunt(logPath):
 if __name__ == '__main__':
     attempts = defaultdict(int) # create an empty dictionary for our attempts
     alreadyBanned = set()
-    if os.path.exists("banned.json"):
+    if os.path.exists(os.path.abspath("banned.json")):
         try:
-            with open("banned.json", "r") as f: alreadyBanned = set(json.load(f))
+            with open(os.path.abspath("banned.json"), "r") as f: alreadyBanned = set(json.load(f))
         except (json.JSONDecodeError, ValueError): print("⚠️ ::: banned.json was corrupted or empty. Initializing new set.")
     # default configuration if none is found:
     config = {
@@ -57,7 +57,7 @@ if __name__ == '__main__':
         "target-jail": "sshd"
     }
     try:
-        with open("alsa.conf", "r") as f:
+        with open(os.path.abspath("alsa.conf"), "r") as f:
             for line in f:
                 line = line.strip()  # remove whitespaces before and after line
                 if not line or line.startswith("#"): continue  # ignore comments or blank lines
@@ -116,7 +116,7 @@ if __name__ == '__main__':
                     print(f"✅ ::: Successfully banned \"{ip}\" in jail {targetJail}!")
                 except subprocess.CalledProcessError as e:
                     print(f"🛑 ::: Failed to block IP address \"{ip}\": {e.stderr.strip()}")
-    with open("banned.json", "w") as f: json.dump(list(alreadyBanned), f, indent = 4)
+    with open(os.path.abspath("banned.json"), "w") as f: json.dump(list(alreadyBanned), f, indent = 4)
     print("\n✅ ::: Report generated! \n-------------------------------------------------------------")
     print("How you should respond by severity:")
     print("🟢🟢⚫⚫⚫ LOW SEVERITY: No further action required. Run this tool as often as you normally would.\n"
