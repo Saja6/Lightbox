@@ -94,7 +94,7 @@ if __name__ == '__main__':
         "directories": []
     }
     try:
-        with open("fict.conf", "r") as f:
+        with open(os.path.abspath("fict.conf"), "r") as f:
             for line in f:
                 line = line.strip()  # remove whitespaces before and after line
                 if not line or line.startswith("#"): continue  # ignore comments or blank lines
