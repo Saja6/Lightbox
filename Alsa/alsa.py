@@ -22,7 +22,7 @@ logEntryPattern = re.compile(rf'{timePatten}.*?{userPattern}\s+{ipPattern}\s+{po
 def loghunt(logPath):
     print("🕒 ::: Now parsing authentication log...")
     try:
-        with open(logPath, 'r') as f:
+        with open(os.path.abspath(logPath), 'r') as f:
             for line in f:
                 if "Failed password" not in line: continue
                 match = logEntryPattern.search(line) # search the line for a matching pattern
