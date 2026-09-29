@@ -39,11 +39,10 @@ if __name__ == "__main__":
     # default configuration if none is found:
     config = {
         "hosts": [],
-        "threads": 6,
-        "filename": "results"
+        "threads": 6
     }
     try:
-        with open("mapping.conf", "r") as f:
+        with open(os.path.abspath("mapping.conf"), "r") as f:
             for line in f:
                 line = line.strip()  # remove whitespaces before and after line
                 if not line or line.startswith("#"): continue  # ignore comments or blank lines
@@ -55,7 +54,6 @@ if __name__ == "__main__":
     # below configurations may end up as default if mapping.conf was not found!
     hostList = [ip.strip() for ip in config.get("hosts", "").split(",") if ip.strip()]
     threads = int(config.get("threads", 6))
-    filename = config.get("filename", "results")
     results = [] # store the raw results here
     futureResults = [] # store the future results here
     errorCount = 0
@@ -64,7 +62,7 @@ if __name__ == "__main__":
         for host in hostList:
             result = executor.submit(ping, host) # submit our function to the pool
             results.append(result)
-    with open(f"{filename}.json", "w") as f:
+    with open("results.json", "w") as f:
         for future in as_completed(results): # print out the results of each ping.
             futureMap = future.result()
             print(f"- Ping result for: {futureMap['Host']}:")
@@ -73,4 +71,4 @@ if __name__ == "__main__":
             futureResults.append(futureMap)
         json.dump(futureResults, f, indent = 4)
     if errorCount > 0: print("⚠️ ::: Warning: some hosts failed to be pinged. Please review results.")
-    print(f"✅ ::: Done! Generated copy of results in {os.path.abspath(filename)}.")
+    print(f"✅ ::: Done! Generated copy of results in results.json.")
