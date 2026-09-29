@@ -13,7 +13,7 @@ from collections import defaultdict
 #   to its respective key.
 def loghunt(logLocation):
     output = []
-    with open(logLocation, 'r') as f:
+    with open(os.path.abspath(logLocation), 'r') as f:
         for line in f:
             if "[UFW BLOCK]" in line: eventtype = "BLOCK"
             elif "[UFW ALLOW]" in line: eventtype = "ALLOW"
@@ -80,8 +80,7 @@ if __name__ == '__main__':
         f"\tWhitelist: {whitelist}\n")
     print(f"🔥::: Now parsing firewall log...")
     eventList = loghunt(logLocation)
-    jsonfile = "results.json"
-    with open(jsonfile, "w") as f: json.dump(eventList, f, indent = 4)
+    with open("results.json", "a") as f: json.dump(eventList, f, indent = 4)
     attempts = defaultdict(int) # make a dictionary for counting attempts per IP and associated actions like BLOCK
     eventtypes = defaultdict(list)
     for event in eventList:
