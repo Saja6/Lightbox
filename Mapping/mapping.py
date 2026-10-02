@@ -1,58 +1,48 @@
-# Copyright 2026 Saja6: https://github.com/Saja6
 import json
-import socket
-import datetime
-import sys
-import threading
+import os
+import subprocess
+from concurrent.futures.thread import ThreadPoolExecutor
+from concurrent.futures import as_completed
+import time
+import platform
+# we will ping a number of hosts to check if we can reach them.
+# @param: the host in the form of an IP address or web address to ping.
+# @return: a dictionary containing the host, status,
+#           and elapsed time for each ping command.
+#           if the ping throws an exception, it will include the error
+#           in the dictionary as well.
+def ping(host):
+    print(f"🕒 ::: Pinging {host}...")
+    start = time.perf_counter()
+    commandFlag = "-n" if platform.system() == "Windows" else "-c"
+    try:
+        # NOTE: on Windows, replace "-c" with "-n"
+        subprocess.run(["ping", commandFlag, "2", host], shell = False, check = True, timeout = 5,
+        capture_output = True, text = True)
+        elapsed = (time.perf_counter() - start)
+        return {
+            "Host": host,
+            "Status": "UP",
+            "Error": "No errors detected",
+            "Time": round(elapsed, 2)
+        }
+    except Exception as e:
+        elapsed = time.perf_counter() - start
+        return {
+            "Host": host,
+            "Status": "DOWN",
+            "Error": str(e),
+            "Time": round(elapsed, 2)
+        }
 
-ReceiveSize = 4096 # total number of bytes we can receive per connection
-
-# we will listen on any port and receive connections and log specific details about it
-# @param: the port number  on which to listen for connections, the maxbytes to receive, and the name of the service to send over.
-# @return: nothing
-def createSocket(port, service, maxBytes):
-        print(f"🪤 ::: Now activating honeypot and listening on {port}.")
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(('', int(port)))
-            s.listen()
-            while True:
-                conn, addr = s.accept()
-                with conn:
-                    print("🚨 ::: Connection made by:", addr)
-                    conn.sendall(f"{service}\r\n".encode()) # send the service name over
-                    totalBytes = 0
-                    while totalBytes < maxBytes: # as long as the total bytes received did not exceed limit:
-                        bytesRemaining = maxBytes - totalBytes # calculate total remaining and receive the smallest of them:
-                        recieveSize = min(ReceiveSize, bytesRemaining)
-                        data = conn.recv(recieveSize)
-                        if not data: break
-                        totalBytes += len(data)
-                        timestamp = datetime.datetime.now().strftime("%B %d %Y at %I:%M %p")
-                        result = {
-                            "IP Address": addr[0],
-                            "Source Port": addr[1],
-                            "Time:": timestamp,
-                            "Data Received:": str(data)
-                        }
-                        # use a lock to allow each thread to write to the same file without messing it up.
-                        jsonLock = threading.Lock()
-                        with jsonLock:
-                            try:
-                                with open("results.json", "r") as f: connections = json.load(f)
-                            except (FileNotFoundError, json.JSONDecodeError): connections = []
-                            connections.append(result)
-                            with open("results.json", "w") as f: json.dump(connections, f, indent=4)
-                    print(f"🪤 ::: Connection from {addr[0]}:{addr[1]} ended after total bytes: {totalBytes}")
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     # default configuration if none is found:
     config = {
-        "ports": "",
-        "service": "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5",
-        "max-bytes": 65536
+        "hosts": [],
+        "threads": 6
     }
     try:
-        with open("microbait.conf", "r") as f:
+        with open(os.path.abspath("mapping.conf"), "r") as f:
             for line in f:
                 line = line.strip()  # remove whitespaces before and after line
                 if not line or line.startswith("#"): continue  # ignore comments or blank lines
@@ -60,19 +50,25 @@ if __name__ == '__main__':
                     key, val = line.split("=", 1)  # separate the key from the value in flip.conf
                     config[key.strip()] = val.strip()
     except FileNotFoundError:
-        print("⚠️ ::: microbait.conf not found. Using default configurations...")
-    # below configurations may end up as default if microbait.conf was not found!
-    ports = [port.strip() for port in config.get("ports", "").split(",") if port.strip()]
-    maxbytes = int(config.get("max-bytes", 65536))
-    services = [service.strip() for service in config.get("services", "").split(",") if service.strip()]
-    if len(ports) != len(services):
-        print(f"🔴 ::: ERROR: List size mismatch: Port list length {len(ports)} != service length {len(services)}. Please check your configuration.")
-        sys.exit(1)
-    print("::: Welcome to Microbait! A lightweight honeypot and IP logging service.")
-    # we will allow multithreading to allow each honeypot connection to run in the background as a daemon
-    threads = []
-    for port, service in zip(ports, services):
-        thread = threading.Thread(target = createSocket, args = (port, service, maxbytes), daemon = True)
-        thread.start()
-        threads.append(thread)
-    for thread in threads: thread.join()
+        print("⚠️ ::: mapping.conf not found. Using default configurations...")
+    # below configurations may end up as default if mapping.conf was not found!
+    hostList = [ip.strip() for ip in config.get("hosts", "").split(",") if ip.strip()]
+    threads = int(config.get("threads", 6))
+    results = [] # store the raw results here
+    futureResults = [] # store the future results here
+    errorCount = 0
+    # use a thread pool executor for improved performance
+    with ThreadPoolExecutor(max_workers = threads) as executor:
+        for host in hostList:
+            result = executor.submit(ping, host) # submit our function to the pool
+            results.append(result)
+    with open("results.json", "w") as f:
+        for future in as_completed(results): # print out the results of each ping.
+            futureMap = future.result()
+            print(f"- Ping result for: {futureMap['Host']}:")
+            print(f"\t🕒Elapsed time: {futureMap['Time']}\n\t❓Status: {futureMap['Status']}\n\t⚠️ Errors: {futureMap['Error']}\n")
+            if(futureMap['Error'] != "No errors detected"): errorCount += 1
+            futureResults.append(futureMap)
+        json.dump(futureResults, f, indent = 4)
+    if errorCount > 0: print("⚠️ ::: Warning: some hosts failed to be pinged. Please review results.")
+    print(f"✅ ::: Done! Generated copy of results in results.json.")
