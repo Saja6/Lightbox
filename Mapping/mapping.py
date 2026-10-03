@@ -55,9 +55,9 @@ if __name__ == "__main__":
     hostList = [ip.strip() for ip in config.get("hosts", "").split(",") if ip.strip()]
     threads = int(config.get("threads", 6))
     results = [] # store the raw results here
-    futureResults = [] # store the future results here
     errorCount = 0
     # use a thread pool executor for improved performance
+    startTime = time.perf_counter()
     with ThreadPoolExecutor(max_workers = threads) as executor:
         for host in hostList:
             result = executor.submit(ping, host) # submit our function to the pool
@@ -68,7 +68,7 @@ if __name__ == "__main__":
             print(f"- Ping result for: {futureMap['Host']}:")
             print(f"\t🕒Elapsed time: {futureMap['Time']}\n\t❓Status: {futureMap['Status']}\n\t⚠️ Errors: {futureMap['Error']}\n")
             if(futureMap['Error'] != "No errors detected"): errorCount += 1
-            futureResults.append(futureMap)
-        json.dump(futureResults, f, indent = 4)
+            f.write(json.dumps(futureMap) + "\n")
+    endTime = time.perf_counter()
     if errorCount > 0: print("⚠️ ::: Warning: some hosts failed to be pinged. Please review results.")
-    print(f"✅ ::: Done! Generated copy of results in results.json.")
+    print(f"✅ ::: Done! Generated copy of results in results.json. Elapsed time: {round(endTime - startTime, 2)} seconds.")
