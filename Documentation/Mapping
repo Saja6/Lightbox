@@ -1,0 +1,33 @@
+Copyright 2026 Saja6: https://github.com/Saja6
+
+Mapping: A terminal pinging solution.
+
+DESCRIPTION
+Mapping is a lightweight CLI tool that
+can ping multiple hosts with the run of a single
+command with multithreaded performance.
+
+CONFIGURATION
+Mapping can be configured with its configuration file, named 'mapping.conf'.
+Here, you can alter the values of the fields to fit your needs:
+
+1. hosts: the list of comma-separated IP addresses or domains to which
+a series of ping requests should be sent to.
+
+2. threads: the number of CPU threads to use for performance optimization.
+
+GENERAL USE
+In the directory you have downloaded Mapping in, run the command: “python3 mapping.py”. 
+Ensure that mapping.conf is in the same directory as the script is.
+Mapping will start pinging the hosts you have specified, sometimes multiple at once
+if you have indicated a certain number of CPU threads to use for the program's 
+execution. After Mapping has successfully ran, it will print out a dictionary 
+for each host it tried to ping, indicating the time taken to resolve the host
+and any errors that happened in case Mapping could not reach the host. The results
+obtained will be written to a JSONL file called "results.jsonl" that includes
+a query-ready structure indicating the trials on each line.
+
+SUPPORT
+If you encounter any issues or bugs when using Mapping, or have any questions regarding 
+general use of it, please email the creator at: stephjay442@gmail.com. 
+Your request will be answered as soon as possible in 1 - 2 days.
