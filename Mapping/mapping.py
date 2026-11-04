@@ -62,7 +62,7 @@ if __name__ == "__main__":
         for host in hostList:
             result = executor.submit(ping, host) # submit our function to the pool
             results.append(result)
-    with open("results.json", "w") as f:
+    with open("results.jsonl", "w") as f:
         for future in as_completed(results): # print out the results of each ping.
             futureMap = future.result()
             print(f"- Ping result for: {futureMap['Host']}:")
@@ -71,4 +71,4 @@ if __name__ == "__main__":
             f.write(json.dumps(futureMap) + "\n")
     endTime = time.perf_counter()
     if errorCount > 0: print("⚠️ ::: Warning: some hosts failed to be pinged. Please review results.")
-    print(f"✅ ::: Done! Generated copy of results in results.json. Elapsed time: {round(endTime - startTime, 2)} seconds.")
+    print(f"✅ ::: Done! Generated copy of results in results.jsonl. Elapsed time: {round(endTime - startTime, 2)} seconds.")
