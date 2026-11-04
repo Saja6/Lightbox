@@ -23,22 +23,12 @@ This license prohibits selling such work under a proprietary license.
 Please read the GNU GPLv3 license attached to this repository, under LICENSE.
 
 3. PROJECT ENHANCEMENT
-No project in this repository may ever be truly finished.
+All projects in this repository are subject to change in features.
 This mostly links back to the first point, except additional features
 may be added to any given project in the near future to enhance
 user experience and improve overall functionality and versatility.
 
-4. ADDITIONAL DOCUMENTATION
-In the event that this repository becomes too large,
-current and future content may disappear from immediate view 
-and be nested in various directories. While this is unlikely,
-documentation for each single project is a planned part of this
-repository that will serve as an introductory manual to the 
-tool that it concerns. In this case, directories containing
-both the relevant code and documentation will be made available
-as opposed to plain .cpp or .py files appearing unorganized.
-
-5. NOTICE OF RESPONSIBLE USE AND SAFETY
+4. NOTICE OF RESPONSIBLE USE AND SAFETY
 Use my tools responsibly and professionally. Some of the 
 tools made available on this repository are capable of supporting
 both security analyst tasks and cyber attacking tasks.
